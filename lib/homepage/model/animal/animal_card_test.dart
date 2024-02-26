@@ -281,7 +281,9 @@
 //   }
 // }
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
 import 'edit_animal.dart';
 
@@ -315,11 +317,14 @@ class AnimalCard extends StatefulWidget {
 }
 
 class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
+  File? _image;
+  final picker = ImagePicker();
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _image = null;
     _tabController = TabController(length: 5, vsync: this);
   }
 
@@ -334,18 +339,42 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
           children: [
             ClipPath(
               clipper: BezierImageClipper(),
-              child: Container(
-                height: 200,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
+              child: Stack(
+                children: [
+                  _image == null
+                      ? Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: AssetImage('assets/images/sığır.jpg'),
+                      ),
+                    ),
+                  )
+                      : Image.file(
+                    _image!,
+                    height: 200,
+                    width: double.infinity,
                     fit: BoxFit.cover,
-                    image: AssetImage('assets/images/sığır.jpg'), // Değişecek
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Align(
-                    alignment: Alignment.topRight,
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: ElevatedButton(
+                      onPressed: getImage,
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.amber,
+                        onPrimary: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                      ),
+                      child: Icon(Icons.camera_alt),
+                    ),
+                  ),
+                  Positioned(
+                    top: 16,
+                    right: 16,
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
@@ -354,16 +383,17 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.amber,
-                        onPrimary: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        primary: Colors.amber, // Butonun arka plan rengi
+                        onPrimary: Colors.white, // Buton metin rengi
+                        shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       child: const Text('Düzenle'),
                     ),
                   ),
-                ),
+
+                ],
               ),
             ),
             Padding(
@@ -392,7 +422,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Menşeii : ${widget.animal.origin ?? ''}',
+                    'Menşei : ${widget.animal.origin ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -518,13 +548,25 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     );
   }
 
+  Future getImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
   void _showVaccineListBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
+          padding: const EdgeInsets.all(16),
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -542,8 +584,8 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
       context: context,
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
+          padding: const EdgeInsets.all(16),
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
