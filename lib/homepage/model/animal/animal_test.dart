@@ -139,6 +139,7 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
             ],
           ),
         ),
+
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
