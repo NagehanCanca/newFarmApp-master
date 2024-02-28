@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/homepage/model/animal/animal_test.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../model/base_cache_manager.dart';
@@ -97,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => NavigationHomeScreen(),
+                            builder: (context) => AnimalTestScreen(),
                           ),
                         );
                       } else {

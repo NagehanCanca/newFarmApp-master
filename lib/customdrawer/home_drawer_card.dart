@@ -48,12 +48,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
         labelName: 'Takip',
         icon: Icon(Icons.track_changes),
       ),
-      DrawerList(
-        index: DrawerIndex.Weighing,
-        labelName: 'Tartı',
-        isAssetsImage: true,
-        imageName: 'assets/images/supportIcon.png',
-      ),
+      // DrawerList(
+      //   index: DrawerIndex.Weighing,
+      //   labelName: 'Tartı',
+      //   isAssetsImage: true,
+      //   imageName: 'assets/images/supportIcon.png',
+      // ),
       DrawerList(
         index: DrawerIndex.Treatment,
         labelName: 'Tedavi',
@@ -317,7 +317,7 @@ enum DrawerIndex {
   Paddock,
   Tracking,
   Treatment,
-  Weighing,
+  //Weighing,
   Share,
   About,
   BaitMixed,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
@@ -23,11 +25,13 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late String _buildDescription;
   late String? _rfid;
   late int? _animalTypeId;
+  final int updateUserId = 1;
+
 
   @override
   void initState() {
     super.initState();
-    _selectedType = ['İnek', 'Düve', 'Damızlık', 'Sığır', ].contains(widget.animal.animalTypeDescription) ? widget.animal.animalTypeDescription! : 'İnek';
+    _selectedType = widget.animal.animalTypeDescription;
     _selectedGender = _formatGender(widget.animal.animalGender);
     _earringNumber = widget.animal.earringNumber ?? '';
     _birthDate = widget.animal.birthDate ?? DateTime.now();
@@ -40,27 +44,36 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
 
   Future<void> _saveChanges() async {
     try {
-      await dio.put('animals/${widget.animal.id}', data: {
-        'animalTypeDescription': _selectedType,
-        'earringNumber': _earringNumber,
-        'birthDate': _birthDate.toIso8601String(),
-        'paddockId': _paddockNumber,
-        'origin': _race,
-        'buildDescription': _buildDescription,
-        'rfid': _rfid,
-        'animalTypeId' : _animalTypeId,
-        // Diğer alanları da ekleyebilirsiniz
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Değişiklikler başarıyla kaydedildi'),
-        duration: Duration(seconds: 2),
-      ));
-      Navigator.pop(context); // Önceki sayfaya geri dön
+    widget.animal.rfid = _rfid;
+    widget.animal.birthDate = _birthDate;
+    widget.animal.earringNumber = _earringNumber;
+     Response response = await dio.put(
+        'Animal/UpdateAnimalInfo?updateUserId=$updateUserId',
+        data: widget.animal.toJson(),
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        if (response.data is bool && response.data) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Değişiklikler başarıyla kaydedildi'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          Navigator.pop(context); // Önceki sayfaya geri dön
+        } else {
+          throw Exception('Güncelleme başarısız oldu');
+        }
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Değişiklikleri kaydederken hata oluştu'),
-        duration: Duration(seconds: 2),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Değişiklikleri kaydederken hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
