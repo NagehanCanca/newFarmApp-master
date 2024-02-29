@@ -1,10 +1,8 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../service/base.service.dart';
-
 
 class EditAnimalPage extends StatefulWidget {
   final AnimalModel animal;
@@ -26,7 +24,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late String? _rfid;
   late int? _animalTypeId;
   final int updateUserId = 1;
-
+  List<String> animalTypes = []; // Hayvan türlerini saklamak için liste
 
   @override
   void initState() {
@@ -40,18 +38,35 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     _buildDescription = widget.animal.buildDescription ?? '';
     _rfid = widget.animal.rfid ?? '';
     _animalTypeId = widget.animal.animalTypeId;
+    _fetchAnimalTypes(); // Hayvan türlerini çekmek için metod çağrısı
+  }
+
+  // API'den hayvan türlerini çeken metod
+  Future<void> _fetchAnimalTypes() async {
+    try {
+      Response response = await dio.get('api/AnimalType/GetAllAnimalTypes');
+      if (response.statusCode == HttpStatus.ok) {
+        setState(() {
+          // API'den gelen verileri listeye atıyoruz
+          animalTypes = List<String>.from(response.data);
+        });
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+    }
   }
 
   Future<void> _saveChanges() async {
     try {
-    widget.animal.rfid = _rfid;
-    widget.animal.birthDate = _birthDate;
-    widget.animal.earringNumber = _earringNumber;
-     Response response = await dio.put(
+      widget.animal.rfid = _rfid;
+      widget.animal.birthDate = _birthDate;
+      widget.animal.earringNumber = _earringNumber;
+      Response response = await dio.put(
         'Animal/UpdateAnimalInfo?updateUserId=$updateUserId',
         data: widget.animal.toJson(),
       );
-
       if (response.statusCode == HttpStatus.ok) {
         if (response.data is bool && response.data) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +92,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,7 +106,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
         ],
       ),
       body: Container(
-        //color: Colors.green,
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
@@ -106,10 +119,9 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
                     _selectedType = newValue;
                   });
                 },
-                items: <String>['İnek', 'Düve', 'Damızlık', 'Sığır']
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: animalTypes.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
-                    value: value, // Değerleri benzersiz yap
+                    value: value,
                     child: Text(value),
                   );
                 }).toList(),
@@ -134,7 +146,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
                   labelText: 'Rfid',
                 ),
               ),
-              const SizedBox(height: 12),
               const SizedBox(height: 12),
               InkWell(
                 onTap: () async {
@@ -172,7 +183,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
                   _race = value;
                 },
                 decoration: const InputDecoration(
-                  labelText: 'Irki',
+                  labelText: 'Menşeii',
                 ),
               ),
               const SizedBox(height: 12),
@@ -195,9 +206,9 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
 
   String _formatGender(AnimalGender? gender) {
     switch (gender) {
-      case AnimalGender.Male:
+      case AnimalGender.Feminine:
         return 'Erkek';
-      case AnimalGender.Female:
+      case AnimalGender.Masculine:
         return 'Dişi';
       default:
         return '';

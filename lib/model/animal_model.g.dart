@@ -31,7 +31,7 @@ AnimalModel _$AnimalModelFromJson(Map<String, dynamic> json) => AnimalModel(
       trackingUserId: json['trackingUserId'] as int?,
       trackingUser: json['trackingUser'] as String?,
       origin: json['origin'] as String?,
-      image: (json['image'] as List<dynamic>?)?.map((e) => e as int).toList(),
+      image: json['image'] as String?,
       farmInsertDate: json['farmInsertDate'] == null
           ? null
           : DateTime.parse(json['farmInsertDate'] as String),
@@ -82,12 +82,13 @@ Map<String, dynamic> _$AnimalModelToJson(AnimalModel instance) =>
     };
 
 const _$AnimalStatusEnumMap = {
-  AnimalStatus.Alive: 0,
-  AnimalStatus.Dead: 1,
-  AnimalStatus.Unknown: 2,
+  AnimalStatus.Normal: 'Normal',
+  AnimalStatus.Ill: 'Ill',
+  AnimalStatus.Ex: 'Ex',
+  AnimalStatus.Sold: 'Sold',
 };
 
 const _$AnimalGenderEnumMap = {
-  AnimalGender.Male: 0,
-  AnimalGender.Female: 1,
+  AnimalGender.Feminine: 'Feminine',
+  AnimalGender.Masculine: 'Masculine',
 };

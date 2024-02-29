@@ -1,104 +1,3 @@
-// import 'package:flutter/material.dart';
-// import '../../../model/animal_model.dart';
-// import 'edit_animal.dart';
-//
-// class BezierImageClipper extends CustomClipper<Path> {
-//   @override
-//   Path getClip(Size size) {
-//     var path = Path();
-//     path.lineTo(0, size.height - 50);
-//     var controlPoint = Offset(50, size.height);
-//     var endPoint = Offset(size.width / 2, size.height);
-//     path.quadraticBezierTo(controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
-//     path.lineTo(size.width, size.height);
-//     path.lineTo(size.width, 0);
-//     path.close();
-//     return path;
-//   }
-//
-//   @override
-//   bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
-//     return false;
-//   }
-// }
-//
-// class AnimalCard extends StatelessWidget {
-//   final AnimalModel animal;
-//
-//   const AnimalCard({Key? key, required this.animal}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SingleChildScrollView(
-//       child: Card(
-//         elevation: 4,
-//         margin: const EdgeInsets.all(8),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             const Padding(
-//               padding: EdgeInsets.all(16),
-//               child: Text(
-//                 'Hayvan Bilgileri',
-//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//             ClipPath(
-//               clipper: BezierImageClipper(),
-//               child: Container(
-//                 width: double.infinity,
-//                 height: 200,
-//                 decoration: const BoxDecoration(
-//                   image: DecorationImage(
-//                     fit: BoxFit.cover,
-//                     image: AssetImage('assets/images/sığır.jpg'), // Değişecek
-//                   ),
-//                 ),
-//                 child: Padding(
-//                   padding: const EdgeInsets.all(16),
-//                   child: Align(
-//                     alignment: Alignment.topRight,
-//                     child: ElevatedButton(
-//                       onPressed: () {
-//                         showModalBottomSheet<void>(
-//                           isScrollControlled: true, // Yukarı doğru kaydırma ve giriş animasyonu için
-//                           context: context,
-//                           builder: (BuildContext context) {
-//                             return AnimatedPadding(
-//                               duration: const Duration(milliseconds: 300), // Animasyon süresi
-//                               curve: Curves.easeOut, // Animasyon eğrisi
-//                               padding: EdgeInsets.only(
-//                                 bottom: MediaQuery.of(context).viewInsets.bottom,
-//                               ),
-//                               child: SingleChildScrollView(
-//                                 child: Column(
-//                                   crossAxisAlignment: CrossAxisAlignment.start,
-//                                   children: <Widget>[
-//                                     _buildBottomSheetItem(context, 'Yem Bilgileri'),
-//                                     _buildBottomSheetItem(context, 'Tartım Bilgileri'),
-//                                     _buildBottomSheetItem(context, 'Tedavi Bilgileri'),
-//                                     _buildBottomSheetItem(context, 'Transfer Bilgileri'),
-//                                     _buildBottomSheetItem(context, 'Maliyet Bilgileri'),
-//                                   ],
-//                                 ),
-//                               ),
-//                             );
-//                           },
-//                         );
-//                       },
-//                       style: ElevatedButton.styleFrom(
-//                         primary: Colors.green, // Butonun arka plan rengi
-//                         onPrimary: Colors.white, // Buton metin rengi
-//                         shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-//                           borderRadius: BorderRadius.circular(10),
-//                         ),
-//                       ),
-//                       child: const Text('Bilgiler'),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ),
 //             Padding(
 //               padding: const EdgeInsets.all(16),
 //               child: Column(
@@ -155,136 +54,14 @@
 //                   //const SizedBox(height: 12),
 //
 //                   const SizedBox(height: 16),
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                     children: [
-//                       Column(
-//                         children: [
-//                           ElevatedButton(
-//                             onPressed: () {
-//                               // Aşı uygula butonuna basıldığında yapılacak işlemler
-//                             },
-//                             style: ElevatedButton.styleFrom(
-//                               primary: Colors.green, // Butonun arka plan rengi
-//                               onPrimary: Colors.white, // Buton metin rengi
-//                               shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-//                                 borderRadius: BorderRadius.circular(10),
-//                               ),
-//                             ),
-//                             child: const Text('Aşı uygula'),
-//                           ),
-//                           const SizedBox(height: 8),
-//                           ElevatedButton(
-//                             onPressed: () {
-//                               // İhbar et butonuna basıldığında yapılacak işlemler
-//                             },
-//                             style: ElevatedButton.styleFrom(
-//                               primary: Colors.red, // Butonun arka plan rengi
-//                               onPrimary: Colors.white, // Buton metin rengi
-//                               shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-//                                 borderRadius: BorderRadius.circular(10),
-//                               ),
-//                             ),
-//                             child: const Text('İhbar et'),
-//                           ),
-//                         ],
-//                       ),
-//                       Column(
-//                         children: [
-//                           ElevatedButton(
-//                             onPressed: () {
-//                               // Tedavi başlat butonuna basıldığında yapılacak işlemler
-//                             },
-//                             style: ElevatedButton.styleFrom(
-//                               primary: Colors.orange, // Butonun arka plan rengi
-//                               onPrimary: Colors.white, // Buton metin rengi
-//                               shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-//                                 borderRadius: BorderRadius.circular(10),
-//                               ),
-//                             ),
-//                             child: const Text('Tedavi başlat'),
-//                           ),
-//                           const SizedBox(height: 8),
-//                           ElevatedButton(
-//                             onPressed: () {
-//                               // Transfer et butonuna basıldığında yapılacak işlemler
-//                             },
-//                             style: ElevatedButton.styleFrom(
-//                               primary: Colors.blue, // Butonun arka plan rengi
-//                               onPrimary: Colors.white, // Buton metin rengi
-//                               shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-//                                 borderRadius: BorderRadius.circular(10),
-//                               ),
-//                             ),
-//                             child: const Text('Transfer et'),
-//                           ),
-//                         ],
-//                       ),
-//                     ],
-//                   ),
-//                   SizedBox(height: 16),
-//                   ElevatedButton(
-//                     onPressed: () {
-//                       Navigator.push(
-//                         context,
-//                         MaterialPageRoute(builder: (context) => EditAnimalPage(animal: animal,)),
-//                       );
-//                     },
-//                     style: ElevatedButton.styleFrom(
-//                       primary: Colors.amber, // Butonun arka plan rengi
-//                       onPrimary: Colors.white, // Buton metin rengi
-//                       shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-//                         borderRadius: BorderRadius.circular(10),
-//                       ),
-//                     ),
-//                     child: const Text('Düzenle'),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
 //
-//   Widget _buildBottomSheetItem(BuildContext context, String text) {
-//     return Container(
-//       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-//       decoration: BoxDecoration(
-//         color: Colors.grey[200],
-//         borderRadius: BorderRadius.circular(10),
-//       ),
-//       child: ListTile(
-//         title: Text(text),
-//         onTap: () {
-//           Navigator.pop(context); // Bottom sheet'i kapat
-//           // İlgili işlemleri yap
-//         },
-//       ),
-//     );
-//   }
-//
-//   String _formatDate(DateTime? date) {
-//     return date != null ? date.toString().split(' ')[0] : '';
-//   }
-//
-//   String _formatGender(AnimalGender? gender) {
-//     switch (gender) {
-//       case AnimalGender.Male:
-//         return 'Erkek';
-//       case AnimalGender.Female:
-//         return 'Dişi';
-//       default:
-//         return '';
-//     }
-//   }
-// }
-
+import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
+import '../../../service/base.service.dart';
 import 'edit_animal.dart';
 
 class BezierImageClipper extends CustomClipper<Path> {
@@ -317,14 +94,18 @@ class AnimalCard extends StatefulWidget {
 }
 
 class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
-  File? _image;
+  //File? _image;
+  final base64Decoder = base64.decoder;
+  final base64Encoder = base64.encoder;
+  late String _image;
   final picker = ImagePicker();
   late TabController _tabController;
+  final int updateUserId = 1;
 
   @override
   void initState() {
     super.initState();
-    _image = null;
+    _image = widget.animal.image ?? '';
     _tabController = TabController(length: 5, vsync: this);
   }
 
@@ -341,21 +122,24 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
               clipper: BezierImageClipper(),
               child: Stack(
                 children: [
-                  _image == null
+                  _image.isEmpty
                       ? Container(
                     height: 200,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       image: DecorationImage(
                         fit: BoxFit.cover,
                         image: AssetImage('assets/images/sığır.jpg'),
                       ),
                     ),
                   )
-                      : Image.file(
-                    _image!,
+                      : Container(
                     height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: Image.memory(base64Decoder.convert(_image)).image,
+                      ),
+                    ),
                   ),
                   Positioned(
                     top: 16,
@@ -369,7 +153,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                       ),
-                      child: Icon(Icons.camera_alt),
+                      child: const Icon(Icons.camera_alt),
                     ),
                   ),
                   Positioned(
@@ -548,17 +332,58 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     );
   }
 
-  Future getImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
+  Future getImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    setState(() async {
       if (pickedFile != null) {
-        _image = File(pickedFile.path);
+        List<int> imageBytes = await pickedFile.readAsBytes();
+        _image  = base64Encoder.convert(imageBytes);
+        widget.animal.image = _image;
+        _saveImage();
       } else {
         print('No image selected.');
       }
     });
   }
+  Future<void> _saveImage() async{
+    try{
+
+      Response response = await dio.put(
+        "Animal/UpdateAnimalImage?updateUserId=$updateUserId",
+        data: widget.animal.toJson(),
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        if (response.data is bool && response.data) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Resim kaydedildi'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          setState(() {
+            // Güncellenmiş resmi ekranda göstermek için _image'i atadık
+            _image = widget.animal.image ?? '';
+          });
+        } else {
+          throw Exception('Kaydetme başarısız oldu');
+        }
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Resmi kaydederken hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+
 
   void _showVaccineListBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -620,26 +445,60 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     );
   }
 
-  void _showTransferBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text('Transfer Et'),
-              // Buraya padok numaralarının listelendiği widgetler eklenecek
-            ],
-          ),
+  void _showTransferBottomSheet(BuildContext context) async {
+    try {
+      Response response = await dio.get(
+          "Building"
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List buildings = response.data; // API'den gelen veriyi alıyoruz
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const Text('Binalar'),
+                  SizedBox(height: 16),
+                  // API'den gelen binaları listeleyen bir ListView oluşturduk.
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: buildings.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(buildings[index]['buildingName']),
+                        onTap: () {
+                          // Burada seçilen binayı işleyebiliriz
+                          Navigator.pop(context); // Bottom sheet'i kapat
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         );
-      },
-    );
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Binalar getirilirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String _formatDate(DateTime? date) {
     return date != null ? date.toString().split(' ')[0] : '';
   }
 }
+

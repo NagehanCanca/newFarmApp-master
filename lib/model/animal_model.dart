@@ -24,7 +24,7 @@ class AnimalModel {
   int? trackingUserId;
   String? trackingUser;
   String? origin;
-  List<int>? image;
+  String? image;
   DateTime? farmInsertDate;
   int? animalRaceId;
   DateTime? exDate;
@@ -70,12 +70,13 @@ class AnimalModel {
 }
 
 enum AnimalStatus {
-  Alive,
-  Dead,
-  Unknown,
+  Normal,
+  Ill,
+  Ex,
+  Sold,
 }
 
 enum AnimalGender {
-  Male,
-  Female,
+  Feminine,
+  Masculine,
 }
