@@ -57,6 +57,7 @@
 //
 import 'dart:convert';
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/animal_type_model.dart';
 import 'package:flutter/material.dart';
@@ -87,14 +88,16 @@ class BezierImageClipper extends CustomClipper<Path> {
 
 class AnimalCard extends StatefulWidget {
   final AnimalModel animal;
+  final List<AnimalTypeModel> animalType;
 
-  const AnimalCard({Key? key, required this.animal}) : super(key: key);
+  const AnimalCard({Key? key, required this.animal, required this.animalType}) : super(key: key);
 
   @override
   _AnimalCardState createState() => _AnimalCardState();
 }
 
 class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
+
   //File? _image;
   late List<AnimalTypeModel> animalType = [];
   final base64Decoder = base64.decoder;
@@ -190,7 +193,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Hayvan Türü: ${widget.animal.animalTypeDescription ?? ''}',
+                    'Hayvan Türü: ${_getAnimalTypeName(widget.animal.animalTypeId) ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -335,6 +338,13 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
       ),
     );
   }
+  String? _getAnimalTypeName(int? typeId) {
+    if (typeId != null) {
+      AnimalTypeModel? animalType = widget.animalType.firstWhereOrNull((element) => element.id == typeId);
+      return animalType?.description;
+    }
+    return null;
+  }
 
 
   Future getImage() async {
@@ -451,9 +461,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
 
   void _showTransferBottomSheet(BuildContext context) async {
     try {
-      Response response = await dio.get(
-          "Building"
-      );
+      Response response = await dio.get("Building");
 
       if (response.statusCode == HttpStatus.ok) {
         List buildings = response.data; // API'den gelen veriyi alıyoruz
@@ -462,25 +470,27 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
           builder: (BuildContext context) {
             return Container(
               padding: const EdgeInsets.all(16),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8), // Yüksekliği sınırla
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   const Text('Binalar'),
                   SizedBox(height: 16),
-                  // API'den gelen binaları listeleyen bir ListView oluşturduk.
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: buildings.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(buildings[index]['buildingName']),
-                        onTap: () {
-                          // Burada seçilen binayı işleyebiliriz
-                          Navigator.pop(context); // Bottom sheet'i kapat
-                        },
-                      );
-                    },
+                  Expanded( // Liste genişlemesi
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: buildings.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(buildings[index]['buildingName']),
+                          onTap: () {
+                            // Burada seçilen binayı işleyebiliriz
+                            Navigator.pop(context); // Bottom sheet'i kapat
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -500,6 +510,8 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
       );
     }
   }
+
+
 
   String _formatDate(DateTime? date) {
     return date != null ? date.toString().split(' ')[0] : '';

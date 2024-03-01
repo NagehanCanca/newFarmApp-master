@@ -20,13 +20,36 @@ class AnimalTypeModel {
     this.updateDate,
   });
 
-  factory AnimalTypeModel.fromJson(Map<String, dynamic> json) => _$AnimalTypeModelFromJson(json);
+  factory AnimalTypeModel.fromJson(Map<String, dynamic> json) {
+    return AnimalTypeModel(
+      id: json['id'],
+      description: json['description'],
+      insertUser: json['insertUser'],
+      insertDate: json['insertDate'] != null ? DateTime.parse(json['insertDate']) : null,
+      updateUser: json['updateUser'],
+      updateDate: json['updateDate'] != null ? DateTime.parse(json['updateDate']) : null,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$AnimalTypeModelToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'description': description,
+      'insertUser': insertUser,
+      'insertDate': insertDate?.toIso8601String(),
+      'updateUser': updateUser,
+      'updateDate': updateDate?.toIso8601String(),
+    };
+  }
 
   @override
-  bool operator ==(Object other){
-    if(identical(this,other))return true;
-    return other is AnimalTypeModel && other.description == description && other.id == id;
+  int get hashCode => description.hashCode ^ id.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is AnimalTypeModel &&
+        other.description == description &&
+        other.id == id;
   }
 }

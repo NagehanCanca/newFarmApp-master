@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/animal_type_model.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class EditAnimalPage extends StatefulWidget {
 
 class _EditAnimalPageState extends State<EditAnimalPage> {
 
-  late String _selectedGender;
+  AnimalGender? _selectedGender;
   late String _earringNumber;
   late DateTime _birthDate;
   late int? _paddockNumber;
@@ -25,25 +26,24 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late String _buildDescription;
   late String? _rfid;
   final int updateUserId = 1;
-
   late int _selectedTypeId;
+  AnimalTypeModel? _selectedType; // _selectedType değişkeni null olarak tanımlandı
+
   @override
   void initState() {
 
     super.initState();
 
     _selectedTypeId = widget.animal.animalTypeId ?? 0;
-    _selectedGender = _formatGender(widget.animal.animalGender);
+    _selectedGender = widget.animal.animalGender;
     _earringNumber = widget.animal.earringNumber ?? '';
     _birthDate = widget.animal.birthDate ?? DateTime.now();
     _paddockNumber = widget.animal.paddockId;
     _race = widget.animal.origin ?? '';
     _buildDescription = widget.animal.buildDescription ?? '';
     _rfid = widget.animal.rfid ?? '';
+    _selectedType = widget.animalType.firstWhereOrNull((element) => element.id == _selectedTypeId); // _selectedType ataması yapıldı
 
-
-
-    // Hayvan türlerini çek
 
   }
 
@@ -66,8 +66,11 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(''),
+              _buildGenderList(), // Cinsiyet seçimi
+              const SizedBox(height: 12),
               const Text('Tür'),
-              _buildTypeDropdown(), // Hayvan türleri dropdown menüsü
+              _buildTypeList(), // Hayvan türleri dropdown menüsü
               const SizedBox(height: 12),
               TextFormField(
                 initialValue: _earringNumber,
@@ -137,19 +140,18 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     );
   }
 
-
   Future<void> _saveChanges() async {
     try {
 
         widget.animal.rfid = _rfid;
         widget.animal.birthDate = _birthDate;
         widget.animal.earringNumber = _earringNumber;
-      // _selectedType'ı kullanarak _animalTypeId değerini güncelle
+        widget.animal.animalTypeId = _selectedType?.id;
+        widget.animal.animalGender =
+        _selectedGender == 'Erkek' ? AnimalGender.Masculine : AnimalGender.Feminine;
+        widget.animal.animalGender = _selectedGender;
 
-        widget.animal.animalTypeId =  widget.animalType.where((element) => element.id == _selectedTypeId).map((e) => e.id) as int?;
-
-
-      Response response = await dio.put(
+        Response response = await dio.put(
         'Animal/UpdateAnimalInfo?updateUserId=$updateUserId',
         data: widget.animal.toJson(),
       );
@@ -169,6 +171,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
         throw Exception('HTTP Hatası ${response.statusCode}');
       }
     } catch (e) {
+      print('Hata: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Değişiklikleri kaydederken hata oluştu'),
@@ -178,34 +181,76 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     }
   }
 
-  Widget _buildTypeDropdown() {
-    return DropdownButton<int>(
-      value: _selectedTypeId,
-      onChanged: (int? value) {
-        setState(() {
-          _selectedTypeId = value!;
-        });
-      },
-      items: widget.animalType.map<DropdownMenuItem<int>>((AnimalTypeModel type) {
-        return DropdownMenuItem<int>(
-          value: type.id ?? 0,
-          child: Text(type.description ?? ''),
+  Widget _buildTypeList() {
+    String initialType = _selectedType != null ? _selectedType!.description ?? '' : ''; // Önceden seçilen türü alın
+
+    return ListTile(
+      title: Text('$initialType'), // Önceden seçilen türü göster
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return ListView.builder(
+              itemCount: widget.animalType.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(widget.animalType[index].description ?? ''),
+                  onTap: () {
+                    setState(() {
+                      _selectedType = widget.animalType[index];
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            );
+          },
         );
-      }).toList(),
+      },
     );
   }
 
+  Widget _buildGenderList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Cinsiyet'),
+        Row(
+          children: [
+            Radio<AnimalGender>(
+              value: AnimalGender.Masculine,
+              groupValue: _selectedGender,
+              onChanged: (value) {
+                setState(() {
+                  _selectedGender = value;
+                });
+              },
+            ),
+            const Text('Erkek'),
+            Radio<AnimalGender>(
+              value: AnimalGender.Feminine,
+              groupValue: _selectedGender,
+              onChanged: (value) {
+                setState(() {
+                  _selectedGender = value;
+                });
+              },
+            ),
+            const Text('Dişi'),
+          ],
+        ),
+      ],
+    );
+  }
 
-
-
-  String _formatGender(AnimalGender? gender) {
+  AnimalGender? _formatGender(String? gender) {
     switch (gender) {
-      case AnimalGender.Feminine:
-        return 'Erkek';
-      case AnimalGender.Masculine:
-        return 'Dişi';
+      case 'Erkek':
+        return AnimalGender.Masculine;
+      case 'Dişi':
+        return AnimalGender.Feminine;
       default:
-        return '';
+        return null;
     }
   }
 }
