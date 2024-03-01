@@ -19,6 +19,7 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
   final TextEditingController earingNumberController = TextEditingController();
   String animalRfid = "";
   int _selectedIndex = 0;
+  //List<AnimalTypeModel> animalType = [];
 
   final List<Widget> _pages = [
     AnimalTestScreen(), // Anasayfa
@@ -60,7 +61,8 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AnimalCard(animal: animal),
+              builder: (context) => AnimalCard(
+                animal: animal),
             ),
           );
         } else {
@@ -213,3 +215,4 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
     );
   }
 }
+

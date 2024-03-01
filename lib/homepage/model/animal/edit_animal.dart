@@ -1,20 +1,22 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/model/animal_type_model.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../service/base.service.dart';
 
 class EditAnimalPage extends StatefulWidget {
   final AnimalModel animal;
+  final List<AnimalTypeModel> animalType;
 
-  const EditAnimalPage({Key? key, required this.animal}) : super(key: key);
+  const EditAnimalPage({Key? key, required this.animal,required this.animalType }) : super(key: key);
 
   @override
-  _EditAnimalPageState createState() => _EditAnimalPageState();
+  _EditAnimalPageState createState()  => _EditAnimalPageState();
 }
 
 class _EditAnimalPageState extends State<EditAnimalPage> {
-  late String? _selectedType;
+
   late String _selectedGender;
   late String _earringNumber;
   late DateTime _birthDate;
@@ -22,14 +24,15 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late String _race;
   late String _buildDescription;
   late String? _rfid;
-  late int? _animalTypeId;
   final int updateUserId = 1;
-  List<String> animalTypes = []; // Hayvan türlerini saklamak için liste
 
+  late int _selectedTypeId;
   @override
   void initState() {
+
     super.initState();
-    _selectedType = widget.animal.animalTypeDescription;
+
+    _selectedTypeId = widget.animal.animalTypeId ?? 0;
     _selectedGender = _formatGender(widget.animal.animalGender);
     _earringNumber = widget.animal.earringNumber ?? '';
     _birthDate = widget.animal.birthDate ?? DateTime.now();
@@ -37,63 +40,15 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     _race = widget.animal.origin ?? '';
     _buildDescription = widget.animal.buildDescription ?? '';
     _rfid = widget.animal.rfid ?? '';
-    _animalTypeId = widget.animal.animalTypeId;
-    _fetchAnimalTypes(); // Hayvan türlerini çekmek için metod çağrısı
-  }
 
-  // API'den hayvan türlerini çeken metod
-  Future<void> _fetchAnimalTypes() async {
-    try {
-      Response response = await dio.get('api/AnimalType/GetAllAnimalTypes');
-      if (response.statusCode == HttpStatus.ok) {
-        setState(() {
-          // API'den gelen verileri listeye atıyoruz
-          animalTypes = List<String>.from(response.data);
-        });
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-    }
-  }
 
-  Future<void> _saveChanges() async {
-    try {
-      widget.animal.rfid = _rfid;
-      widget.animal.birthDate = _birthDate;
-      widget.animal.earringNumber = _earringNumber;
-      Response response = await dio.put(
-        'Animal/UpdateAnimalInfo?updateUserId=$updateUserId',
-        data: widget.animal.toJson(),
-      );
-      if (response.statusCode == HttpStatus.ok) {
-        if (response.data is bool && response.data) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Değişiklikler başarıyla kaydedildi'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          Navigator.pop(context); // Önceki sayfaya geri dön
-        } else {
-          throw Exception('Güncelleme başarısız oldu');
-        }
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Değişiklikleri kaydederken hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+
+    // Hayvan türlerini çek
+
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hayvan Kartını Düzenle'),
@@ -112,20 +67,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Tür'),
-              DropdownButton<String>(
-                value: _selectedType,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedType = newValue;
-                  });
-                },
-                items: animalTypes.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+              _buildTypeDropdown(), // Hayvan türleri dropdown menüsü
               const SizedBox(height: 12),
               TextFormField(
                 initialValue: _earringNumber,
@@ -156,9 +98,9 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
                     lastDate: DateTime(2100),
                   );
                   if (pickedDate != null && pickedDate != _birthDate) {
-                    setState(() {
-                      _birthDate = pickedDate;
-                    });
+                    // setState(() {
+                    //   _birthDate = pickedDate;
+                    // });
                   }
                 },
                 child: InputDecorator(
@@ -188,21 +130,73 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
               ),
               const SizedBox(height: 12),
               const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _animalTypeId?.toString() ?? '',
-                onChanged: (value) {
-                  _animalTypeId = int.tryParse(value);
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Type',
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
+
+
+  Future<void> _saveChanges() async {
+    try {
+
+        widget.animal.rfid = _rfid;
+        widget.animal.birthDate = _birthDate;
+        widget.animal.earringNumber = _earringNumber;
+      // _selectedType'ı kullanarak _animalTypeId değerini güncelle
+
+        widget.animal.animalTypeId =  widget.animalType.where((element) => element.id == _selectedTypeId).map((e) => e.id) as int?;
+
+
+      Response response = await dio.put(
+        'Animal/UpdateAnimalInfo?updateUserId=$updateUserId',
+        data: widget.animal.toJson(),
+      );
+      if (response.statusCode == HttpStatus.ok) {
+        if (response.data is bool && response.data) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Değişiklikler başarıyla kaydedildi'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          Navigator.pop(context); // Önceki sayfaya geri dön
+        } else {
+          throw Exception('Güncelleme başarısız oldu');
+        }
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Değişiklikleri kaydederken hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Widget _buildTypeDropdown() {
+    return DropdownButton<int>(
+      value: _selectedTypeId,
+      onChanged: (int? value) {
+        setState(() {
+          _selectedTypeId = value!;
+        });
+      },
+      items: widget.animalType.map<DropdownMenuItem<int>>((AnimalTypeModel type) {
+        return DropdownMenuItem<int>(
+          value: type.id ?? 0,
+          child: Text(type.description ?? ''),
+        );
+      }).toList(),
+    );
+  }
+
+
+
 
   String _formatGender(AnimalGender? gender) {
     switch (gender) {

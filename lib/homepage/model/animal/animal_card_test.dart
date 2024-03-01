@@ -58,6 +58,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/model/animal_type_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
@@ -95,6 +96,7 @@ class AnimalCard extends StatefulWidget {
 
 class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
   //File? _image;
+  late List<AnimalTypeModel> animalType = [];
   final base64Decoder = base64.decoder;
   final base64Encoder = base64.encoder;
   late String _image;
@@ -107,6 +109,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     super.initState();
     _image = widget.animal.image ?? '';
     _tabController = TabController(length: 5, vsync: this);
+
   }
 
   @override
@@ -160,10 +163,11 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                     top: 16,
                     right: 16,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        await _fetchAnimalTypes();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => EditAnimalPage(animal: widget.animal)),
+                          MaterialPageRoute(builder: ( context) => EditAnimalPage(animal: widget.animal, animalType : animalType)),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -499,6 +503,31 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
 
   String _formatDate(DateTime? date) {
     return date != null ? date.toString().split(' ')[0] : '';
+  }
+
+
+// API'den hayvan türlerini çeken metod
+  Future<void> _fetchAnimalTypes() async {
+    try {
+      Response response = await dio.get(
+        'AnimalType/GetAllAnimalTypes',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data; // API'den gelen veri listesi
+        setState(() {
+          animalType = responseData.map((json) => AnimalTypeModel.fromJson(json))
+              .toList();
+
+        });
+
+
+      } else {
+        throw Exception("Http hatası");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }
 

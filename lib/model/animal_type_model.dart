@@ -23,4 +23,10 @@ class AnimalTypeModel {
   factory AnimalTypeModel.fromJson(Map<String, dynamic> json) => _$AnimalTypeModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$AnimalTypeModelToJson(this);
+
+  @override
+  bool operator ==(Object other){
+    if(identical(this,other))return true;
+    return other is AnimalTypeModel && other.description == description && other.id == id;
+  }
 }
