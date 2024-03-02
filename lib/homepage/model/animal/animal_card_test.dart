@@ -63,7 +63,11 @@ import 'package:farmsoftnew/model/animal_type_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
+import '../../../model/animal_race_model.dart';
+import '../../../model/paddock_model.dart';
 import '../../../service/base.service.dart';
+import '../transfer/building_list.dart';
+import '../transfer/transfer.dart';
 import 'edit_animal.dart';
 
 class BezierImageClipper extends CustomClipper<Path> {
@@ -89,8 +93,10 @@ class BezierImageClipper extends CustomClipper<Path> {
 class AnimalCard extends StatefulWidget {
   final AnimalModel animal;
   final List<AnimalTypeModel> animalType;
+  final List<AnimalRaceModel> animalRace;
+  final PaddockModel? selectedPaddock;
 
-  const AnimalCard({Key? key, required this.animal, required this.animalType}) : super(key: key);
+  const AnimalCard({Key? key, required this.animal, required this.animalType, required this.animalRace, this.selectedPaddock}) : super(key: key);
 
   @override
   _AnimalCardState createState() => _AnimalCardState();
@@ -100,6 +106,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
 
   //File? _image;
   late List<AnimalTypeModel> animalType = [];
+  late List<AnimalRaceModel> animalRace = [];
   final base64Decoder = base64.decoder;
   final base64Encoder = base64.encoder;
   late String _image;
@@ -168,9 +175,10 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                     child: ElevatedButton(
                       onPressed: () async {
                         await _fetchAnimalTypes();
+                        await _fetchAnimalRaces();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: ( context) => EditAnimalPage(animal: widget.animal, animalType : animalType)),
+                          MaterialPageRoute(builder: ( context) => EditAnimalPage(animal: widget.animal, animalType : animalType, animalRace: animalRace,)),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -193,7 +201,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Hayvan Türü: ${_getAnimalTypeName(widget.animal.animalTypeId) ?? ''}',
+                    'Hayvan Türü: ${widget.animal.animalTypeId ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -208,12 +216,16 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Padok : ${widget.animal.paddockDescription ?? ''}',
+                    'Padok : ${widget.animal.id ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Menşei : ${widget.animal.origin ?? ''}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Irkı: ${widget.animal.animalRaceId ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -345,6 +357,10 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     }
     return null;
   }
+  String? _getAnimalRaceName(int? typeId) {
+    AnimalRaceModel? animalRace = widget.animalRace.firstOrNull!;
+    return animalRace?.raceName;
+  }
 
 
   Future getImage() async {
@@ -459,57 +475,30 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     );
   }
 
-  void _showTransferBottomSheet(BuildContext context) async {
-    try {
-      Response response = await dio.get("Building");
-
-      if (response.statusCode == HttpStatus.ok) {
-        List buildings = response.data; // API'den gelen veriyi alıyoruz
-        showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8), // Yüksekliği sınırla
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const Text('Binalar'),
-                  SizedBox(height: 16),
-                  Expanded( // Liste genişlemesi
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: buildings.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(buildings[index]['buildingName']),
-                          onTap: () {
-                            // Burada seçilen binayı işleyebiliriz
-                            Navigator.pop(context); // Bottom sheet'i kapat
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+  void _showTransferBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Bottom sheet'i kapat
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TransferPage()));
+            },
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue,
+              onPrimary: Colors.white,
+            ),
+            child: const Text('Transfer Et'),
+          ),
         );
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Binalar getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+      },
+    );
   }
+
 
 
 
@@ -541,5 +530,31 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
       throw Exception(e.toString());
     }
   }
+
+//API'den hayvan ırklarını çeken metod
+  Future<void> _fetchAnimalRaces() async {
+    try {
+      Response response = await dio.get(
+        'AnimalRace/GetAllAnimalRaces',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data; // API'den gelen veri listesi
+        setState(() {
+          animalRace = responseData.map((json) => AnimalRaceModel.fromJson(json))
+              .toList();
+
+        });
+
+
+      } else {
+        throw Exception("Http hatası");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 }
+
+
 

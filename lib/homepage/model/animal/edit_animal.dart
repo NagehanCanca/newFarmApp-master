@@ -4,13 +4,15 @@ import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/animal_type_model.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
+import '../../../model/animal_race_model.dart';
 import '../../../service/base.service.dart';
 
 class EditAnimalPage extends StatefulWidget {
   final AnimalModel animal;
   final List<AnimalTypeModel> animalType;
+  final List<AnimalRaceModel> animalRace;
 
-  const EditAnimalPage({Key? key, required this.animal,required this.animalType }) : super(key: key);
+  const EditAnimalPage({Key? key, required this.animal,required this.animalType, required this.animalRace }) : super(key: key);
 
   @override
   _EditAnimalPageState createState()  => _EditAnimalPageState();
@@ -22,28 +24,30 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late String _earringNumber;
   late DateTime _birthDate;
   late int? _paddockNumber;
-  late String _race;
+  //late String _race;
   late String _buildDescription;
   late String? _rfid;
   final int updateUserId = 1;
   late int _selectedTypeId;
+  late int _selectedRaceId;
   AnimalTypeModel? _selectedType; // _selectedType değişkeni null olarak tanımlandı
+  AnimalRaceModel? _selectedRace;
 
   @override
   void initState() {
 
     super.initState();
-
+    _selectedRaceId = widget.animal.animalRaceId?? 0;
     _selectedTypeId = widget.animal.animalTypeId ?? 0;
     _selectedGender = widget.animal.animalGender;
     _earringNumber = widget.animal.earringNumber ?? '';
     _birthDate = widget.animal.birthDate ?? DateTime.now();
     _paddockNumber = widget.animal.paddockId;
-    _race = widget.animal.origin ?? '';
+    //_race = widget.animal.origin ?? '';
     _buildDescription = widget.animal.buildDescription ?? '';
     _rfid = widget.animal.rfid ?? '';
     _selectedType = widget.animalType.firstWhereOrNull((element) => element.id == _selectedTypeId); // _selectedType ataması yapıldı
-
+    _selectedRace = widget.animalRace.firstWhereOrNull((element) => element.id == _selectedRaceId);
 
   }
 
@@ -72,6 +76,8 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
               const Text('Tür'),
               _buildTypeList(), // Hayvan türleri dropdown menüsü
               const SizedBox(height: 12),
+              const Text('Irk'),
+              _buildRaceList(),
               TextFormField(
                 initialValue: _earringNumber,
                 onChanged: (value) {
@@ -122,17 +128,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _race,
-                onChanged: (value) {
-                  _race = value;
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Menşeii',
-                ),
-              ),
-              const SizedBox(height: 12),
-              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -142,10 +137,10 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
 
   Future<void> _saveChanges() async {
     try {
-
         widget.animal.rfid = _rfid;
         widget.animal.birthDate = _birthDate;
         widget.animal.earringNumber = _earringNumber;
+        widget.animal.animalRaceId = _selectedRace?.id;
         widget.animal.animalTypeId = _selectedType?.id;
         widget.animal.animalGender =
         _selectedGender == 'Erkek' ? AnimalGender.Masculine : AnimalGender.Feminine;
@@ -198,6 +193,35 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
                   onTap: () {
                     setState(() {
                       _selectedType = widget.animalType[index];
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildRaceList() {
+    String initialRace = _selectedRace != null ? _selectedRace!.raceName ?? '' : ''; // Önceden seçilen türü alın
+
+    return ListTile(
+      title: Text('$initialRace'), // Önceden seçilen türü göster
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return ListView.builder(
+              itemCount: widget.animalRace.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(widget.animalRace[index].raceName ?? ''),
+                  onTap: () {
+                    setState(() {
+                      _selectedRace = widget.animalRace[index];
                     });
                     Navigator.pop(context);
                   },

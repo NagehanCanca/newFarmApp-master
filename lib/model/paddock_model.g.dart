@@ -41,6 +41,6 @@ Map<String, dynamic> _$PaddockModelToJson(PaddockModel instance) =>
     };
 
 const _$PaddockTypeEnumMap = {
-  PaddockType.Normal: 'Normal',
-  PaddockType.Infirmary: 'Infirmary',
+  PaddockType.Normal: 0,
+  PaddockType.Infirmary: 1,
 };

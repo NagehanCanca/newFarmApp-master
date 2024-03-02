@@ -62,7 +62,7 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => AnimalCard(
-                animal: animal, animalType: [],),
+                animal: animal, animalType: [], animalRace: []),
             ),
           );
         } else {

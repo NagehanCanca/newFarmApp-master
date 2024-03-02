@@ -53,7 +53,7 @@ Map<String, dynamic> _$AnimalModelToJson(AnimalModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'animalBuyingDetailId': instance.animalBuyingDetailId,
-      'animalStatus': _$AnimalStatusEnumMap[instance.animalStatus!.index],
+      'animalStatus': _$AnimalStatusEnumMap[instance.animalStatus],
       'rfid': instance.rfid,
       'earringNumber': instance.earringNumber,
       'animalTypeId': instance.animalTypeId,
@@ -84,7 +84,7 @@ Map<String, dynamic> _$AnimalModelToJson(AnimalModel instance) =>
 const _$AnimalStatusEnumMap = {
   AnimalStatus.Normal: 0,
   AnimalStatus.Ill: 1,
-  AnimalStatus.Ex:2,
+  AnimalStatus.Ex: 2,
   AnimalStatus.Sold: 3,
 };
 
