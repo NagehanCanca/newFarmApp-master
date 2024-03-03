@@ -65,6 +65,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/animal_race_model.dart';
 import '../../../model/paddock_model.dart';
+import '../../../model/transfer_model.dart';
 import '../../../service/base.service.dart';
 import '../transfer/building_list.dart';
 import '../transfer/transfer.dart';
@@ -95,8 +96,9 @@ class AnimalCard extends StatefulWidget {
   final List<AnimalTypeModel> animalType;
   final List<AnimalRaceModel> animalRace;
   final PaddockModel? selectedPaddock;
+  final TransferModel? transferInfo;
 
-  const AnimalCard({Key? key, required this.animal, required this.animalType, required this.animalRace, this.selectedPaddock}) : super(key: key);
+  const AnimalCard({Key? key, required this.animal, required this.animalType, required this.animalRace, this.selectedPaddock, this.transferInfo}) : super(key: key);
 
   @override
   _AnimalCardState createState() => _AnimalCardState();
@@ -335,12 +337,31 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                           child: Text('Tedavi Bilgileri'),
                         ),
                         // Transfer sekmesi içeriği
-                        Container(
-                          alignment: Alignment.center,
-                          child: Text('Transfer Bilgileri'),
+                      Container(
+                        alignment: Alignment.center,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Transfer Bilgileri:',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            if (widget.transferInfo != null) ...[
+                              Text('Yeni Padok: ${widget.transferInfo!.newPaddock}'),
+                              Text('Yeni Bölüm: ${widget.transferInfo!.newSection ?? 'Bilgi yok'}'),
+                              Text('Yeni Bina: ${widget.transferInfo!.newBuilding ?? 'Bilgi yok'}'),
+                              Text('Eski Padok: ${widget.transferInfo!.oldPaddock}'),
+                              Text('Eski Bölüm: ${widget.transferInfo!.oldSection ?? 'Bilgi yok'}'),
+                              Text('Eski Bina: ${widget.transferInfo!.oldBuilding ?? 'Bilgi yok'}'),
+                              Text('Transferi Yapan: ${widget.transferInfo!.insertUser}'),
+                              Text('Transfer Tarihi: ${widget.transferInfo!.date?.toString() ?? 'Bilgi yok'}'),
+                            ]
+                            else
+                              Text('Transfer bilgileri bulunamadı.'),
+                          ],
                         ),
-                      ],
-                    ),
+                      )
+                  ]),
                   ),
                 ],
               ),
