@@ -9,10 +9,8 @@ import '../../../service/base.service.dart';
 
 class EditAnimalPage extends StatefulWidget {
   final AnimalModel animal;
-  final List<AnimalTypeModel> animalType;
-  final List<AnimalRaceModel> animalRace;
 
-  const EditAnimalPage({Key? key, required this.animal,required this.animalType, required this.animalRace }) : super(key: key);
+  const EditAnimalPage({Key? key, required this.animal}) : super(key: key);
 
   @override
   _EditAnimalPageState createState()  => _EditAnimalPageState();
@@ -24,6 +22,8 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late String _earringNumber;
   late DateTime _birthDate;
   late int? _paddockNumber;
+  late List<AnimalTypeModel> animalType = [];
+  late List<AnimalRaceModel> animalRace = [];
   //late String _race;
   late String _buildDescription;
   late String? _rfid;
@@ -37,6 +37,8 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   void initState() {
 
     super.initState();
+    _fetchAnimalTypes();
+    _fetchAnimalRaces();
     _selectedRaceId = widget.animal.animalRaceId?? 0;
     _selectedTypeId = widget.animal.animalTypeId ?? 0;
     _selectedGender = widget.animal.animalGender;
@@ -46,8 +48,8 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     //_race = widget.animal.origin ?? '';
     _buildDescription = widget.animal.buildDescription ?? '';
     _rfid = widget.animal.rfid ?? '';
-    _selectedType = widget.animalType.firstWhereOrNull((element) => element.id == _selectedTypeId); // _selectedType ataması yapıldı
-    _selectedRace = widget.animalRace.firstWhereOrNull((element) => element.id == _selectedRaceId);
+    _selectedType = animalType.firstWhereOrNull((element) => element.id == _selectedTypeId); // _selectedType ataması yapıldı
+    _selectedRace = animalRace.firstWhereOrNull((element) => element.id == _selectedRaceId);
 
   }
 
@@ -186,13 +188,13 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
           context: context,
           builder: (BuildContext context) {
             return ListView.builder(
-              itemCount: widget.animalType.length,
+              itemCount: animalType.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(widget.animalType[index].description ?? ''),
+                  title: Text(animalType[index].description ?? ''),
                   onTap: () {
                     setState(() {
-                      _selectedType = widget.animalType[index];
+                      _selectedType = animalType[index];
                     });
                     Navigator.pop(context);
                   },
@@ -215,13 +217,13 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
           context: context,
           builder: (BuildContext context) {
             return ListView.builder(
-              itemCount: widget.animalRace.length,
+              itemCount: animalRace.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(widget.animalRace[index].raceName ?? ''),
+                  title: Text(animalRace[index].raceName ?? ''),
                   onTap: () {
                     setState(() {
-                      _selectedRace = widget.animalRace[index];
+                      _selectedRace = animalRace[index];
                     });
                     Navigator.pop(context);
                   },
@@ -277,4 +279,54 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
         return null;
     }
   }
+
+
+// API'den hayvan türlerini çeken metod
+  Future<void> _fetchAnimalTypes() async {
+    try {
+      Response response = await dio.get(
+        'AnimalType/GetAllAnimalTypes',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data; // API'den gelen veri listesi
+        setState(() {
+          animalType = responseData.map((json) => AnimalTypeModel.fromJson(json))
+              .toList();
+
+        });
+
+
+      } else {
+        throw Exception("Http hatası");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+//API'den hayvan ırklarını çeken metod
+  Future<void> _fetchAnimalRaces() async {
+    try {
+      Response response = await dio.get(
+        'AnimalRace/GetAllAnimalRaces',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data; // API'den gelen veri listesi
+        setState(() {
+          animalRace = responseData.map((json) => AnimalRaceModel.fromJson(json))
+              .toList();
+
+        });
+
+
+      } else {
+        throw Exception("Http hatası");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
 }

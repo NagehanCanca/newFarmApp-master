@@ -60,6 +60,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/animal_type_model.dart';
+import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
@@ -91,41 +92,44 @@ class BezierImageClipper extends CustomClipper<Path> {
   }
 }
 
+
 class AnimalCard extends StatefulWidget {
   final AnimalModel animal;
-  final List<AnimalTypeModel> animalType;
-  final List<AnimalRaceModel> animalRace;
-  final PaddockModel? selectedPaddock;
-  final TransferModel? transferInfo;
 
-  const AnimalCard({Key? key, required this.animal, required this.animalType, required this.animalRace, this.selectedPaddock, this.transferInfo}) : super(key: key);
+
+  const AnimalCard({Key? key, required this.animal}) : super(key: key);
 
   @override
   _AnimalCardState createState() => _AnimalCardState();
 }
 
 class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
+  late List<TransferModel> transferInfo = [];
 
   //File? _image;
-  late List<AnimalTypeModel> animalType = [];
-  late List<AnimalRaceModel> animalRace = [];
+  //late List<AnimalTypeModel> animalType = [];
+  //late List<AnimalRaceModel> animalRace = [];
   final base64Decoder = base64.decoder;
   final base64Encoder = base64.encoder;
   late String _image;
   final picker = ImagePicker();
   late TabController _tabController;
   final int updateUserId = 1;
+  //late AnimalModel selectedAnimal;
+
 
   @override
   void initState() {
-    super.initState();
     _image = widget.animal.image ?? '';
     _tabController = TabController(length: 5, vsync: this);
+    _fetchTransferInfo(widget.animal.id!);
+    super.initState();
 
   }
 
   @override
   Widget build(BuildContext context) {
+
     return SingleChildScrollView(
       child: Card(
         elevation: 4,
@@ -175,12 +179,10 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                     top: 16,
                     right: 16,
                     child: ElevatedButton(
-                      onPressed: () async {
-                        await _fetchAnimalTypes();
-                        await _fetchAnimalRaces();
+                      onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: ( context) => EditAnimalPage(animal: widget.animal, animalType : animalType, animalRace: animalRace,)),
+                          MaterialPageRoute(builder: ( context) => EditAnimalPage(animal: widget.animal,)),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -218,7 +220,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Padok : ${widget.animal.id ?? ''}',
+                    'Padok : ${widget.animal.paddockId ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -288,8 +290,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
-                    ),
-                    child: const Text('Transfer et'),
+                    ), child: const Text('Transfer et'),
                   ),
                   const SizedBox(height: 16),
                   TabBar(
@@ -324,43 +325,67 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                         // Yem sekmesi içeriği
                         Container(
                           alignment: Alignment.center,
-                          child: Text('Yem Bilgileri'),
+                          child: const Text('Yem Bilgileri'),
                         ),
                         // Tartım sekmesi içeriği
-                        Container(
+                         Container(
                           alignment: Alignment.center,
-                          child: Text('Tartım Bilgileri'),
+                          child: const Text('Tartım Bilgileri'),
                         ),
                         // Tedavi sekmesi içeriği
-                        Container(
+                         Container(
                           alignment: Alignment.center,
-                          child: Text('Tedavi Bilgileri'),
+                          child: const Text('Tedavi Bilgileri'),
                         ),
                         // Transfer sekmesi içeriği
-                      Container(
-                        alignment: Alignment.center,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Transfer Bilgileri:',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            if (widget.transferInfo != null) ...[
-                              Text('Yeni Padok: ${widget.transferInfo!.newPaddock}'),
-                              Text('Yeni Bölüm: ${widget.transferInfo!.newSection ?? 'Bilgi yok'}'),
-                              Text('Yeni Bina: ${widget.transferInfo!.newBuilding ?? 'Bilgi yok'}'),
-                              Text('Eski Padok: ${widget.transferInfo!.oldPaddock}'),
-                              Text('Eski Bölüm: ${widget.transferInfo!.oldSection ?? 'Bilgi yok'}'),
-                              Text('Eski Bina: ${widget.transferInfo!.oldBuilding ?? 'Bilgi yok'}'),
-                              Text('Transferi Yapan: ${widget.transferInfo!.insertUser}'),
-                              Text('Transfer Tarihi: ${widget.transferInfo!.date?.toString() ?? 'Bilgi yok'}'),
-                            ]
-                            else
-                              Text('Transfer bilgileri bulunamadı.'),
-                          ],
-                        ),
-                      )
+                        Container(
+                          alignment: Alignment.center,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Transfer Bilgileri:',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              if (transferInfo.isNotEmpty)
+                                DataTable(
+                                  columns: const [
+                                    DataColumn(label: Text('Eski')),
+                                    DataColumn(label: Text('Yeni')),
+                                    DataColumn(label: Text('İşlem Yapan')),
+                                    DataColumn(label: Text('İşlem Tarihi')),
+                                  ],
+                                  rows: [
+                                    DataRow(cells: [
+                                      DataCell(Text(transferInfo[0].oldPaddockString())),
+                                      DataCell(Text(transferInfo[0].newPaddockString())),
+                                      DataCell(Text(transferInfo[0].insertUser ?? '')),
+                                      DataCell(Text(transferInfo[0].date?.toString() ?? '')),
+                                    ]),
+                                  ],
+                                ),
+                              if (transferInfo.isEmpty)
+                                const Text('Transfer bilgileri bulunamadı.'),
+                            ],
+                          ),
+                        )
+                      // Container(
+                      //   alignment: Alignment.center,
+                      //   child: Column(
+                      //     crossAxisAlignment: CrossAxisAlignment.stretch,
+                      //     children: [
+                      //       const Text(
+                      //         'Transfer Bilgileri:',
+                      //         style: TextStyle(fontWeight: FontWeight.bold),
+                      //       ),
+                      //       if (transferInfo.isNotEmpty) ...[
+                      //         Text('${transferInfo?[0].oldPaddockString()} ${transferInfo?[0].newPaddockString()}  ${transferInfo?[0].insertUser} ${transferInfo?[0].date?.toString()}' ),
+                      //       ]
+                      //       else
+                      //         const Text('Transfer bilgileri bulunamadı.'),
+                      //     ],
+                      //   ),
+                      // )
                   ]),
                   ),
                 ],
@@ -370,17 +395,6 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
         ),
       ),
     );
-  }
-  String? _getAnimalTypeName(int? typeId) {
-    if (typeId != null) {
-      AnimalTypeModel? animalType = widget.animalType.firstWhereOrNull((element) => element.id == typeId);
-      return animalType?.description;
-    }
-    return null;
-  }
-  String? _getAnimalRaceName(int? typeId) {
-    AnimalRaceModel? animalRace = widget.animalRace.firstOrNull!;
-    return animalRace?.raceName;
   }
 
 
@@ -497,84 +511,45 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
   }
 
   void _showTransferBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // Bottom sheet'i kapat
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TransferPage()));
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.blue,
-              onPrimary: Colors.white,
-            ),
-            child: const Text('Transfer Et'),
-          ),
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TransferPage(selectedAnimal: widget.animal)),
     );
   }
-
-
-
 
   String _formatDate(DateTime? date) {
     return date != null ? date.toString().split(' ')[0] : '';
   }
 
-
-// API'den hayvan türlerini çeken metod
-  Future<void> _fetchAnimalTypes() async {
+  Future<void> _fetchTransferInfo(int animalId) async {
     try {
       Response response = await dio.get(
-        'AnimalType/GetAllAnimalTypes',
+          "Transfer/GetAllAnimalTransfersByAnimalId",
+        queryParameters: {
+          "animalId": animalId,
+        }
       );
-
       if (response.statusCode == HttpStatus.ok) {
-        List<dynamic> responseData = response.data; // API'den gelen veri listesi
-        setState(() {
-          animalType = responseData.map((json) => AnimalTypeModel.fromJson(json))
-              .toList();
+        List<dynamic> responseData = response.data;
 
-        });
+        transferInfo =  responseData.map((json) => TransferModel.fromJson(json)).toList();
+setState(() {
 
-
+});
       } else {
-        throw Exception("Http hatası");
+        throw Exception('HTTP Hatası ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception(e.toString());
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transfer bilgileri getirilirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
-//API'den hayvan ırklarını çeken metod
-  Future<void> _fetchAnimalRaces() async {
-    try {
-      Response response = await dio.get(
-        'AnimalRace/GetAllAnimalRaces',
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        List<dynamic> responseData = response.data; // API'den gelen veri listesi
-        setState(() {
-          animalRace = responseData.map((json) => AnimalRaceModel.fromJson(json))
-              .toList();
-
-        });
-
-
-      } else {
-        throw Exception("Http hatası");
-      }
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
 }
 
 

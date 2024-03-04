@@ -19,6 +19,7 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
   final TextEditingController earingNumberController = TextEditingController();
   String animalRfid = "";
   int _selectedIndex = 0;
+  AnimalModel? selectedAnimal;
   //List<AnimalTypeModel> animalType = [];
 
   final List<Widget> _pages = [
@@ -58,11 +59,14 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
       if (response.statusCode == HttpStatus.ok) {
         if (response.data != null) {
           AnimalModel animal = AnimalModel.fromJson(response.data);
+          setState(() {
+            selectedAnimal = animal; // selectedAnimal değişkenine değer ataması
+          });
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AnimalCard(
-                animal: animal, animalType: [], animalRace: []),
+                animal: animal, ),
             ),
           );
         } else {
