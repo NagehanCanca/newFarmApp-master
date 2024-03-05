@@ -70,6 +70,8 @@ import '../../../model/transfer_model.dart';
 import '../../../service/base.service.dart';
 import '../transfer/building_list.dart';
 import '../transfer/transfer.dart';
+import '../vaccination/animal_vaccination.dart';
+import 'animal_details.dart';
 import 'edit_animal.dart';
 
 class BezierImageClipper extends CustomClipper<Path> {
@@ -122,7 +124,6 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
   void initState() {
     _image = widget.animal.image ?? '';
     _tabController = TabController(length: 5, vsync: this);
-    _fetchTransferInfo(widget.animal.id!);
     super.initState();
 
   }
@@ -293,100 +294,21 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                     ), child: const Text('Transfer et'),
                   ),
                   const SizedBox(height: 16),
-                  TabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      Tab(text: 'Maliyet'),
-                      Tab(text: 'Yem'),
-                      Tab(text: 'Tartım'),
-                      Tab(text: 'Tedavi'),
-                      Tab(text: 'Transfer'),
-                    ],
-                    labelColor: Colors.white, // Seçili sekmenin metin rengi
-                    unselectedLabelColor: Colors.black87, // Seçilmemiş sekmenin metin rengi
-                    indicator: BoxDecoration( // Aktif sekmenin altındaki gösterge
-                      color: Colors.blue, // Gösterge rengi
-                      borderRadius: BorderRadius.circular(50), // Gösterge kenar yuvarlaklığı
-                    ),
-                    labelPadding: EdgeInsets.symmetric(horizontal: 20), // Başlık içeriği ile kenar arasındaki boşluk
-                    isScrollable: true, // Sekmelerin kaydırılabilir olması
-                    labelStyle: const TextStyle(fontSize: 14), // Başlık metni stilini ayarla
-                  ),
                   SizedBox(
-                    height: 200, // TabBarView yüksekliği
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Maliyet sekmesi içeriği
-                        Container(
-                          alignment: Alignment.center,
-                          child: Text('Maliyet Bilgileri'),
-                        ),
-                        // Yem sekmesi içeriği
-                        Container(
-                          alignment: Alignment.center,
-                          child: const Text('Yem Bilgileri'),
-                        ),
-                        // Tartım sekmesi içeriği
-                         Container(
-                          alignment: Alignment.center,
-                          child: const Text('Tartım Bilgileri'),
-                        ),
-                        // Tedavi sekmesi içeriği
-                         Container(
-                          alignment: Alignment.center,
-                          child: const Text('Tedavi Bilgileri'),
-                        ),
-                        // Transfer sekmesi içeriği
-                        Container(
-                          alignment: Alignment.center,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Text(
-                                'Transfer Bilgileri:',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              if (transferInfo.isNotEmpty)
-                                DataTable(
-                                  columns: const [
-                                    DataColumn(label: Text('Eski')),
-                                    DataColumn(label: Text('Yeni')),
-                                    DataColumn(label: Text('İşlem Yapan')),
-                                    DataColumn(label: Text('İşlem Tarihi')),
-                                  ],
-                                  rows: [
-                                    DataRow(cells: [
-                                      DataCell(Text(transferInfo[0].oldPaddockString())),
-                                      DataCell(Text(transferInfo[0].newPaddockString())),
-                                      DataCell(Text(transferInfo[0].insertUser ?? '')),
-                                      DataCell(Text(transferInfo[0].date?.toString() ?? '')),
-                                    ]),
-                                  ],
-                                ),
-                              if (transferInfo.isEmpty)
-                                const Text('Transfer bilgileri bulunamadı.'),
-                            ],
-                          ),
-                        )
-                      // Container(
-                      //   alignment: Alignment.center,
-                      //   child: Column(
-                      //     crossAxisAlignment: CrossAxisAlignment.stretch,
-                      //     children: [
-                      //       const Text(
-                      //         'Transfer Bilgileri:',
-                      //         style: TextStyle(fontWeight: FontWeight.bold),
-                      //       ),
-                      //       if (transferInfo.isNotEmpty) ...[
-                      //         Text('${transferInfo?[0].oldPaddockString()} ${transferInfo?[0].newPaddockString()}  ${transferInfo?[0].insertUser} ${transferInfo?[0].date?.toString()}' ),
-                      //       ]
-                      //       else
-                      //         const Text('Transfer bilgileri bulunamadı.'),
-                      //     ],
-                      //   ),
-                      // )
-                  ]),
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AnimalDetailsPage(animal: widget.animal)),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue, // Buton rengi
+                        onPrimary: Colors.white, // Buton metin rengi
+                      ),
+                      child: const Text('Hayvan Bilgileri'), // Buton metni
+                    ),
                   ),
                 ],
               ),
@@ -451,24 +373,11 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
 
 
   void _showVaccineListBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text('Aşı Listesi'),
-              // Buraya aşı listesinin görüntülendiği widgetler eklenebilir
-            ],
-          ),
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AnimalVaccinationPage(animal: widget.animal)),
     );
   }
-
   void _showTreatmentOptionsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -521,34 +430,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     return date != null ? date.toString().split(' ')[0] : '';
   }
 
-  Future<void> _fetchTransferInfo(int animalId) async {
-    try {
-      Response response = await dio.get(
-          "Transfer/GetAllAnimalTransfersByAnimalId",
-        queryParameters: {
-          "animalId": animalId,
-        }
-      );
-      if (response.statusCode == HttpStatus.ok) {
-        List<dynamic> responseData = response.data;
 
-        transferInfo =  responseData.map((json) => TransferModel.fromJson(json)).toList();
-setState(() {
-
-});
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Transfer bilgileri getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
 
 }
 

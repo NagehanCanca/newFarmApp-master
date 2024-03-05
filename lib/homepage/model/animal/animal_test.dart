@@ -88,14 +88,7 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Anasayfa'),
-      ),
-      drawer: AnimalTestMenu(
-        onMenuItemSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
+      ),drawer: SideBarMenu(),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
