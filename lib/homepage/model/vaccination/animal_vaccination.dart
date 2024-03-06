@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/animal_vaccination_model.dart';
@@ -59,7 +60,6 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
     return DataTable(
       columns: const [
         DataColumn(label: Text('İşlem')),
-        DataColumn(label: Text('Durum')),
         DataColumn(label: Text('Uygulama Tarihi')),
         DataColumn(label: Text('Aşı')),
         DataColumn(label: Text('Miktar')),
@@ -74,14 +74,19 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
         return DataRow(
           cells: [
             DataCell(
-              !isApplied
+              isApplied
                   ? ElevatedButton(
+                onPressed: () => _applyVaccination(vaccination),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.red), // İptal Et butonunun arka plan rengini kırmızı olarak ayarlar
+                ),
+                child: Text('İptal Et', style: TextStyle(color: Colors.white)), // İptal Et butonunun metninin rengini beyaz olarak ayarlar
+              )
+                  : ElevatedButton(
                 onPressed: isPastDate ? () => _applyVaccination(vaccination) : null,
                 child: Text('Aşı Uygula'),
-              )
-                  : Text('Aşı Yapıldı'),
+              ),
             ),
-            DataCell(Text(_formatVaccinationStatus(vaccination.animalVaccinationStatus))),
             DataCell(Text(vaccination.applicationDay.toString())),
             DataCell(Text(vaccination.productDescription ?? '')),
             DataCell(Text(vaccination.quantity.toString())),
@@ -93,9 +98,6 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
       }).toList(),
     );
   }
-
-
-
   Future<void> _fetchVaccinations(int animalId) async {
     try {
       Response response = await dio.get(
@@ -125,15 +127,20 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
   Future<void> _applyVaccination(AnimalVaccinationModel vaccination) async {
     try {
       setState(() {
-        if(vaccination.animalVaccinationStatus == AnimalVaccinationStatus.Applied)
+        if (vaccination.animalVaccinationStatus == AnimalVaccinationStatus.Applied)
           vaccination.animalVaccinationStatus = AnimalVaccinationStatus.NotApplied;
         else
-          vaccination.animalVaccinationStatus = AnimalVaccinationStatus.NotApplied;
+          vaccination.animalVaccinationStatus = AnimalVaccinationStatus.Applied;
       });
+
       Response response = await dio.put(
         "Vaccination/UpdateAnimalVaccinationSchedule",
+        queryParameters: {
+          "userId": cachemanager.getItem(0)?.id,
+        },
         data: vaccination.toJson(),
       );
+
       if (response.statusCode == HttpStatus.ok) {
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -143,13 +150,19 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
           ),
         );
       } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
+        throw Exception('HTTP Hatası ${response.statusMessage}');
       }
-    } catch (e) {
+    }  on DioException catch (e)  {
+      setState(() {
+        if (vaccination.animalVaccinationStatus == AnimalVaccinationStatus.Applied)
+          vaccination.animalVaccinationStatus = AnimalVaccinationStatus.NotApplied;
+        else
+          vaccination.animalVaccinationStatus = AnimalVaccinationStatus.Applied;
+      });
       print('Hata: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Aşı uygulanırken bir hata oluştu'),
+        SnackBar(
+          content: Text(e.response!.data.toString()),
           duration: Duration(seconds: 2),
         ),
       );

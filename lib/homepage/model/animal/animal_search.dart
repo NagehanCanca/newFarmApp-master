@@ -131,7 +131,7 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Lütfen bir padok seçin'),
                     ),
                   );

@@ -63,9 +63,9 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
                         SizedBox(height: 8),
                         Text('Küpe No: ${animal.earringNumber}', style: TextStyle(fontSize: 16)),
                         SizedBox(height: 8),
-                        Text('Durum: ${animal.animalStatus}', style: TextStyle(fontSize: 16)),
+                        Text('Durum: ${animal.animalStatus.toString().split('.').last}', style: TextStyle(fontSize: 16)),
                         SizedBox(height: 8),
-                        Text('Giriş Tarihi: ${animal.farmInsertDate}', style: TextStyle(fontSize: 16)),
+                        Text('Giriş Tarihi: ${_formatDate!(animal.farmInsertDate!)}', style: TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),
@@ -77,8 +77,9 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
       },
     );
   }
-
-
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
+  }
 
   Future<void> _fetchAnimals(int paddockID) async {
     try {

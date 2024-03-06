@@ -68,6 +68,7 @@ import '../../../model/animal_race_model.dart';
 import '../../../model/paddock_model.dart';
 import '../../../model/transfer_model.dart';
 import '../../../service/base.service.dart';
+import '../animalReport/animal_report.dart';
 import '../transfer/building_list.dart';
 import '../transfer/transfer.dart';
 import '../vaccination/animal_vaccination.dart';
@@ -398,24 +399,9 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
   }
 
   void _showNotifyBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16),
-          child: ElevatedButton(
-            onPressed: () {
-              // İhbar et işlemi gerçekleştirilebilir
-              Navigator.pop(context); // Bottom sheet'i kapat
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.red,
-              onPrimary: Colors.white,
-            ),
-            child: const Text('İhbar Et'),
-          ),
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AnimalReportPage(animal: widget.animal,)),
     );
   }
 
