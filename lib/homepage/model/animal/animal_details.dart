@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
@@ -39,7 +38,7 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> with SingleTicker
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hayvan Detayları'),
+        title: const Text('Hayvan Detayları'),
       ),
       body: RotatedBox( // Yatay konum için RotatedBox kullanın
         quarterTurns: 1, // İçeriği 90 derece döndürün
@@ -65,7 +64,7 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> with SingleTicker
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    labelPadding: EdgeInsets.symmetric(horizontal: 20),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 20),
                     isScrollable: false,
                     labelStyle: const TextStyle(fontSize: 14),
                   ),
@@ -76,7 +75,7 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> with SingleTicker
                       children: [
                         Container(
                           alignment: Alignment.center,
-                          child: Text('Maliyet Bilgileri'),
+                          child: const Text('Maliyet Bilgileri'),
                         ),
                         Container(
                           alignment: Alignment.center,
