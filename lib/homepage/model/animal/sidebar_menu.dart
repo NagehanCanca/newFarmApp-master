@@ -1,3 +1,4 @@
+import 'package:farmsoftnew/homepage/model/bulk/bulk_operations.dart';
 import 'package:flutter/material.dart';
 import 'package:farmsoftnew/screens/weighing/weighing_confirmation_page.dart';
 import 'animal_search.dart';
@@ -53,7 +54,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AnimalSearchWidget()),
+                MaterialPageRoute(builder: (context) => AnimalSearchWidget(operationType: '',)),
               );
             },
           ),
@@ -63,6 +64,15 @@ class SideBarMenu extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => WeighingConfirmationPage()),
+              );
+            },
+          ),
+          ListTile(
+            title: Text('Toplu İşlemler'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BulkOperationSelectionScreen()),
               );
             },
           ),

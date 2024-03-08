@@ -16,120 +16,124 @@ class AnimalDetailsPage extends StatefulWidget {
 
 class _AnimalDetailsPageState extends State<AnimalDetailsPage> with SingleTickerProviderStateMixin {
   late List<TransferModel> transferInfo;
+  late PageController _pageController;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     transferInfo = []; // transferInfo'yu başlatıyoruz
-    _tabController = TabController(length: 5, vsync: this);
     _fetchTransferInfo(widget.animal.id!);
+    _pageController = PageController(initialPage: _selectedIndex);
   }
 
   @override
   void dispose() {
-    _tabController.dispose(); // _tabController'ı temizliyoruz
+    _pageController.dispose();
     super.dispose();
   }
 
-  late TabController _tabController;
   final int updateUserId = 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hayvan Detayları'),
+        title: Text('Hayvan Detayları'),
       ),
-      body: RotatedBox( // Yatay konum için RotatedBox kullanın
-        quarterTurns: 1, // İçeriği 90 derece döndürün
-        child: Column( // Yatay konumda bir sütun kullanın
-          children: [
-            DefaultTabController(
-              length: 5,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: [
+          Container(
+            alignment: Alignment.center,
+            child: Text('Maliyet Bilgileri'),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Yem Bilgileri'),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Tartım Bilgileri'),
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text('Tedavi Bilgileri'),
+          ),
+          SingleChildScrollView(
+            child: Container(
+              alignment: Alignment.center,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      Tab(text: 'Maliyet'),
-                      Tab(text: 'Yem'),
-                      Tab(text: 'Tartım'),
-                      Tab(text: 'Tedavi'),
-                      Tab(text: 'Transfer'),
-                    ],
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.black87,
-                    indicator: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    isScrollable: false,
-                    labelStyle: const TextStyle(fontSize: 14),
+                  const Text(
+                    'Transfer Bilgileri:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(
-                    height: 200,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          child: const Text('Maliyet Bilgileri'),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: const Text('Yem Bilgileri'),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: const Text('Tartım Bilgileri'),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: const Text('Tedavi Bilgileri'),
-                        ),
-                        SingleChildScrollView(
-                          child: Container(
-                            alignment: Alignment.center,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const Text(
-                                  'Transfer Bilgileri:',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                if (transferInfo.isNotEmpty)
-                                  DataTable(
-                                    columns: const [
-                                      DataColumn(label: Text('Eski')),
-                                      DataColumn(label: Text('Yeni')),
-                                      DataColumn(label: Text('İşlem Yapan')),
-                                      DataColumn(label: Text('İşlem Tarihi')),
-                                    ],
-                                    rows: [
-                                      DataRow(cells: [
-                                        DataCell(Text(transferInfo[0].oldPaddockString())),
-                                        DataCell(Text(transferInfo[0].newPaddockString())),
-                                        DataCell(Text(transferInfo[0].insertUser ?? '')),
-                                        DataCell(Text(transferInfo[0].date?.toString() ?? '')),
-                                      ]),
-                                    ],
-                                  ),
-                                if (transferInfo.isEmpty)
-                                  const Text('Transfer bilgileri bulunamadı.'),
-                              ],
-                            ),
-                          ),
-                        ),
+                  if (transferInfo.isNotEmpty)
+                    DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Eski')),
+                        DataColumn(label: Text('Yeni')),
+                        DataColumn(label: Text('İşlem Yapan')),
+                        DataColumn(label: Text('İşlem Tarihi')),
+                      ],
+                      rows: [
+                        DataRow(cells: [
+                          DataCell(Text(transferInfo[0].oldPaddockString())),
+                          DataCell(Text(transferInfo[0].newPaddockString())),
+                          DataCell(Text(transferInfo[0].insertUser ?? '')),
+                          DataCell(Text(transferInfo[0].date?.toString() ?? '')),
+                        ]),
                       ],
                     ),
-                  ),
+                  if (transferInfo.isEmpty)
+                    const Text('Transfer bilgileri bulunamadı.'),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+            _pageController.animateToPage(
+              _selectedIndex,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.ease,
+            );
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money),
+            label: 'Maliyet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.local_dining),
+            label: 'Yem',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timeline),
+            label: 'Tartım',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.healing),
+            label: 'Tedavi',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.swap_horiz),
+            label: 'Transfer',
+          ),
+        ],
       ),
     );
   }

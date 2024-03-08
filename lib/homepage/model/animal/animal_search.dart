@@ -10,6 +10,9 @@ import '../../../service/base.service.dart';
 import 'animal_card_test.dart';
 
 class AnimalSearchWidget extends StatefulWidget {
+  final String operationType; // operationType ekleniyor
+
+  AnimalSearchWidget({required this.operationType});
   @override
   _AnimalSearchWidgetState createState() => _AnimalSearchWidgetState();
 }
@@ -35,7 +38,7 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hayvan ve Alan Arama'),
+        title: Text('Hayvan ve Alan Arama - ${widget.operationType}'), // operationType başlıkta gösteriliyor
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -55,11 +58,11 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
             ),
             const SizedBox(height: 16),
             if (selectedAnimal != null)
-              // ListTile(
-              //   title: Text(selectedAnimal!.animalTypeDescription ?? ''),
-              //   subtitle: Text(selectedAnimal!.buildDescription ?? ''),
-              // ),
-            const SizedBox(height: 32),
+            // ListTile(
+            //   title: Text(selectedAnimal!.animalTypeDescription ?? ''),
+            //   subtitle: Text(selectedAnimal!.buildDescription ?? ''),
+            // ),
+              const SizedBox(height: 32),
             DropdownButtonFormField<BuildingModel>(
               value: selectedBuilding,
               hint: const Text('Bina Seçiniz'),

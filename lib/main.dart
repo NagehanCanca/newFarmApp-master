@@ -9,7 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
+import 'homepage/model/animal/animal_details.dart';
+import 'homepage/model/bulk/bulk_operations.dart';
 import 'introduction/login/login_screen.dart';
+import 'model/animal_model.dart';
 import 'model/user_model.dart';
 
 void main() async {
@@ -43,9 +46,9 @@ class MyApp extends StatelessWidget {
         platform: TargetPlatform.iOS,
         scaffoldBackgroundColor: Colors.white
       ),
-     home: LoginScreen(),
+     //home: LoginScreen(),
       //home: AnimalTestScreen(),
-     //home: NavigationHomeScreen(),
+      home: BulkOperationSelectionScreen(),
     );
   }
 }
