@@ -9,41 +9,60 @@ class BulkOperationSelectionScreen extends StatelessWidget {
         title: Text('Toplu İşlem Seçimi'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () {
-                // Toplu Aşılama işlemi için geçiş yap
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => AnimalSearchWidget(operationType: 'Aşılama')),
                 );
               },
-              child: Text('Toplu Aşılama'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(20.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              icon: const Icon(Icons.medical_services),
+              label: const Text('Toplu Aşılama', style: TextStyle(fontSize: 18)),
             ),
-            SizedBox(height: 16),
-            ElevatedButton(
+            SizedBox(height: 20),
+            ElevatedButton.icon(
               onPressed: () {
-                // Toplu Transfer işlemi için geçiş yap
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => AnimalSearchWidget(operationType: 'Transfer')),
                 );
               },
-              child: Text('Toplu Transfer'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(20.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Toplu Transfer', style: TextStyle(fontSize: 18)),
             ),
-            SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
               onPressed: () {
-                // Toplu Yem Dağıtımı işlemi için geçiş yap
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => AnimalSearchWidget(operationType: 'Yem Dağıtımı')),
                 );
               },
-              child: Text('Toplu Yem Dağıtımı'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(20.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              icon: const Icon(Icons.fastfood),
+              label: const Text('Toplu Yem Dağıtımı', style: TextStyle(fontSize: 18)),
             ),
             // Buraya istediğiniz diğer toplu işlemleri ekleyebilirsiniz
           ],

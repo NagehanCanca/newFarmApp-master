@@ -50,10 +50,9 @@ class _AnimalTestScreenState extends State<AnimalTestScreen> {
       }
 
       Response response = await dio.get(
-        "Animal/GetAnimalByRfId",
+        "Animal/GetAnimalByRfIdOrEarringNumber",
         queryParameters: {
-          "RfId": searchController.text,
-          "earingNumber":  earingNumberController.text,
+          "identityNumber": searchController.text,
         },
       );
       if (response.statusCode == HttpStatus.ok) {

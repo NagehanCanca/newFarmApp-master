@@ -41,7 +41,8 @@ class SideBarMenu extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: Text('Anasayfa'),
+            leading: const Icon(Icons.home),
+            title: const Text('Anasayfa'),
             onTap: () {
               Navigator.push(
                 context,
@@ -50,7 +51,8 @@ class SideBarMenu extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('Hayvan Arama'),
+            leading: const Icon(Icons.search),
+            title: const Text('Hayvan Arama'),
             onTap: () {
               Navigator.push(
                 context,
@@ -59,7 +61,8 @@ class SideBarMenu extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('Tartı'),
+            leading: const Icon(Icons.scale),
+            title: const Text('Tartı'),
             onTap: () {
               Navigator.push(
                 context,
@@ -68,7 +71,8 @@ class SideBarMenu extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('Toplu İşlemler'),
+            leading: const Icon(Icons.playlist_add),
+            title: const Text('Toplu İşlemler'),
             onTap: () {
               Navigator.push(
                 context,

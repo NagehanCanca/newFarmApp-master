@@ -46,9 +46,9 @@ class MyApp extends StatelessWidget {
         platform: TargetPlatform.iOS,
         scaffoldBackgroundColor: Colors.white
       ),
-     //home: LoginScreen(),
+     home: LoginScreen(),
       //home: AnimalTestScreen(),
-      home: BulkOperationSelectionScreen(),
+      //home: BulkOperationSelectionScreen(),
     );
   }
 }

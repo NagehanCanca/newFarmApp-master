@@ -192,6 +192,7 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
 
   Future<void> _fetchPaddocks(int sectionId) async {
     try {
+
       Response response = await dio.get("Paddock?sectionId=$sectionId");
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
@@ -214,9 +215,9 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
   Future<void> _searchAnimal() async {
     try {
       Response response = await dio.get(
-        "Animal/GetAnimalByRfId",
+        "Animal/GetAnimalByRfIdOrEarringNumber",
         queryParameters: {
-          "RfId": searchController.text,
+          "identityNumber": searchController.text,
         },
       );
       if (response.statusCode == HttpStatus.ok) {

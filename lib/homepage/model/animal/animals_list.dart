@@ -28,6 +28,24 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Animals List'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.check_box_outlined),
+            onPressed: () {
+              setState(() {
+                if (selectedAnimals.length < animalList.length) {
+                  selectedAnimals = List.from(animalList);
+                } else {
+                  selectedAnimals.clear();
+                }
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.done),
+            onPressed: () => _bulkVaccination(),
+          ),
+        ],
       ),
       body: _buildAnimalList(),
     );
@@ -131,9 +149,8 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
     }
 
     try {
-      // Seçilen hayvanlar için toplu aşılama işlemini burada gerçekleştirin
-      // Seçilen hayvanları aşılamak için selectedAnimals listesini kullanabilirsiniz
-      // API çağrısı veya başka bir işlem yapabilirsiniz
+      // Seçilen hayvanlar için toplu aşılama işlemini burada gerçekleştir
+      // Seçilen hayvanları aşılamak için selectedAnimals listesini kullan
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
