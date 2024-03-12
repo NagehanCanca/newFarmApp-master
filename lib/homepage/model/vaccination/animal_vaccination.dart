@@ -169,12 +169,4 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
     }
   }
 
-
-  String _formatVaccinationStatus(AnimalVaccinationStatus? status) {
-    if (status == AnimalVaccinationStatus.Applied) {
-      return 'Uygulandı';
-    } else {
-      return 'Uygulanmadı';
-    }
-  }
 }

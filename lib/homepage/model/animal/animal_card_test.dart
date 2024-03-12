@@ -57,19 +57,15 @@
 //
 import 'dart:convert';
 import 'dart:io';
-import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
-import 'package:farmsoftnew/model/animal_type_model.dart';
-import 'package:farmsoftnew/model/base_cache_manager.dart';
+import 'package:farmsoftnew/homepage/model/treatment/new_treatment.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../model/animal_model.dart';
-import '../../../model/animal_race_model.dart';
-import '../../../model/paddock_model.dart';
 import '../../../model/transfer_model.dart';
+import '../../../model/treatment_model.dart';
 import '../../../service/base.service.dart';
 import '../animalReport/animal_report.dart';
-import '../transfer/building_list.dart';
 import '../transfer/transfer.dart';
 import '../vaccination/animal_vaccination.dart';
 import 'animal_details.dart';
@@ -107,6 +103,7 @@ class AnimalCard extends StatefulWidget {
 }
 
 class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
+  late TreatmentModel selectedTreatment;
   late List<TransferModel> transferInfo = [];
 
   //File? _image;
@@ -225,16 +222,16 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Padok : ${widget.animal.paddockId ?? ''}',
+                    'Padok : ${widget.animal.paddockDescription ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Menşei : ${widget.animal.origin ?? ''}',
+                    'Menşei : ${widget.animal.origin.toString() ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  Text('Irkı: ${widget.animal.animalRaceId ?? ''}',
+                  Text('Irkı: ${widget.animal.animalRaceId.toString() ?? ''}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -384,21 +381,9 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     );
   }
   void _showTreatmentOptionsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text('Tedavi Seçenekleri'),
-              // Buraya tedavi seçeneklerinin görüntülendiği widgetler eklenebilir
-            ],
-          ),
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NewTreatmentPage(animal: widget.animal)),
     );
   }
 

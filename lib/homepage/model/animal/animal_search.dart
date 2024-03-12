@@ -221,16 +221,16 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
         },
       );
       if (response.statusCode == HttpStatus.ok) {
-        if (response.data != null) {
-          AnimalModel animal = AnimalModel.fromJson(response.data);
+        List<dynamic> responseData = response.data;
+        if (responseData.isNotEmpty) {
+          AnimalModel animal = AnimalModel.fromJson(responseData.first);
           setState(() {
             selectedAnimal = animal;
           });
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AnimalCard(
-                  animal: animal ),
+              builder: (context) => AnimalCard(animal: animal),
             ),
           );
         } else {

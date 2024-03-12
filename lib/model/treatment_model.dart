@@ -52,12 +52,14 @@ class TreatmentModel {
 
   Map<String, dynamic> toJson() => _$TreatmentModelToJson(this);
 }
+
 enum TreatmentEndType {
   Cured,
   ToFollow,
   Ex,
 }
-enum TreatmentStatus{
+enum TreatmentStatus {
   NewTreatment,
   EndedTreatment,
+  Finished,
 }

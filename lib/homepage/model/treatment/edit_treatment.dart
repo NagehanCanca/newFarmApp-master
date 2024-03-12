@@ -80,10 +80,35 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Küpe No: ${widget.animal.earringNumber}'),
-        Text('Durumu: ${widget.animal.animalStatus}'),
+        Text('Durumu: ${widget.animal.animalStatus.toString()}'),
         Text('Çiftliğe Giriş Tarihi: ${widget.animal.farmInsertDate.toString().split(' ')[0]}'),
         Text('Padok: ${widget.animal.paddockId}'),
       ],
+    );
+  }
+
+  void _showDiagnosesBottomSheet(List<String> diagnoses) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 300,
+          child: ListView.builder(
+            itemCount: diagnoses.length,
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                title: Text(diagnoses[index]),
+                onTap: () {
+                  setState(() {
+                    _selectedDiagnosis = diagnoses[index];
+                  });
+                  Navigator.pop(context); // BottomSheet'i kapat
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -108,31 +133,36 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
         ),
         const SizedBox(height: 12),
         FutureBuilder<List<String>>(
-          future: _fetchDiagnoses(), // API'den verileri alıyoruz
+          future: _fetchDiagnoses(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text('Hata: ${snapshot.error}');
             } else {
-              return DropdownButtonFormField<String>(
-                value: _selectedDiagnosis,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDiagnosis = value;
-                  });
+              List<String> diagnoses = snapshot.data!;
+              return InkWell(
+                onTap: () {
+                  _showDiagnosesBottomSheet(diagnoses);
                 },
-                items: snapshot.data!.map((diagnosis) {
-                  return DropdownMenuItem<String>(
-                    value: diagnosis,
-                    child: Text(diagnosis),
-                  );
-                }).toList(),
-                decoration: InputDecoration(labelText: 'Tanı'),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Tanı Seçin',
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(_selectedDiagnosis ?? 'Tanı Seçilmedi'),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
+                  ),
+                ),
               );
             }
           },
         ),
+        const SizedBox(height: 12),
         TextField(
           controller: _descriptionController,
           decoration: InputDecoration(labelText: 'Not'),
@@ -140,6 +170,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ],
     );
   }
+
+
 
   void _pickDate() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -157,12 +189,11 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   Future<List<String>> _fetchDiagnoses() async {
     try {
-      Response response = await dio.get(
-          'Treatment/GetAllTreatmentDiagnoses'
-      );
+      Response response = await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
+
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
-        List<String> diagnoses = responseData.map((item) => item.toString()).toList();
+        List<String> diagnoses = responseData.map((item) => item['name'].toString()).toList();
         return diagnoses;
       } else {
         throw Exception('HTTP Hatası ${response.statusCode}');
@@ -173,17 +204,42 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
-  void _endTreatment() {
-    // Tedavinin sonlandırılması işlemleri burada yapılacak.
+
+  void _endTreatment() async {
+    try {
+      Response response = await dio.post(
+        'Treatment/FinishAnimalTreatment?treatmentId=${widget.treatment.id}',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tedavi başarıyla sonlandırıldı'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.pop(context); // Önceki sayfaya geri dön
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tedavi sonlandırılırken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _saveTreatment() async {
     try {
       Response response = await dio.put(
-        'Treatment/UpdateTreatmentInfo',
+        'Treatment/UpdateAnimalTreatment',
         data: {
           'id': widget.treatment.id,
-          'date': _selectedDate,
+          'date': _selectedDate.toIso8601String(),
           'diagnosisId': _selectedDiagnosis,
           'description': _descriptionController.text,
         },

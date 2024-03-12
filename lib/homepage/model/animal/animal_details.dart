@@ -14,7 +14,7 @@ class AnimalDetailsPage extends StatefulWidget {
   _AnimalDetailsPageState createState() => _AnimalDetailsPageState();
 }
 
-class _AnimalDetailsPageState extends State<AnimalDetailsPage> with SingleTickerProviderStateMixin {
+class _AnimalDetailsPageState extends State<AnimalDetailsPage> {
   late List<TransferModel> transferInfo;
   late PageController _pageController;
   int _selectedIndex = 0;
@@ -137,6 +137,7 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> with SingleTicker
       ),
     );
   }
+
   Future<void> _fetchTransferInfo(int animalId) async {
     try {
       Response response = await dio.get(

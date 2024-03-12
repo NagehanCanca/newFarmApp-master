@@ -55,6 +55,6 @@ Map<String, dynamic> _$AnimalVaccinationModelToJson(
     };
 
 const _$AnimalVaccinationStatusEnumMap = {
-  AnimalVaccinationStatus.NotApplied: 'NotApplied',
-  AnimalVaccinationStatus.Applied: 'Applied',
+  AnimalVaccinationStatus.NotApplied:0 ,
+  AnimalVaccinationStatus.Applied: 1,
 };

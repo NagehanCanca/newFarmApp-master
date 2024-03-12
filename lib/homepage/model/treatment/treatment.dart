@@ -37,12 +37,6 @@ class _TreatmentPageState extends State<TreatmentPage> {
         scrollDirection: Axis.horizontal,
         child: _buildTreatmentTable(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showBottomSheet(); // Bottom sheeti göster
-        },
-        child: Icon(Icons.add),
-      ),
     );
   }
 
@@ -136,8 +130,9 @@ class _TreatmentPageState extends State<TreatmentPage> {
 
   Future<void> _fetchTreatmentsForSelectedAnimals() async {
     try {
-      Response response = await dio.get("Treatment/GetAllTreatmentAnimals");
-
+      Response response = await dio.get(
+          "Treatment/GetAllTreatmentAnimals"
+      );
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
         setState(() {
@@ -159,109 +154,16 @@ class _TreatmentPageState extends State<TreatmentPage> {
     }
   }
 
-  void _showBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.symmetric(vertical: 20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.add),
-                title: Text('Tedavi Başlat'),
-                onTap: () {
-                  Navigator.pop(context); // Bottom sheeti kapat
-                  _startTreatment(); // Tedavi başlat fonksiyonunu çağır
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.edit),
-                title: Text('Tedavi Düzenle'),
-                onTap: () {
-                  Navigator.pop(context); // Bottom sheeti kapat
-                  // Düzenlemek için bir tedavi seçmelerini iste
-                  if (_treatments.isNotEmpty) {
-                    _selectAnimalAndEditTreatment();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Düzenlenecek tedavi bulunamadı'),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _startTreatment() {
-    // Tedavi başlatma işlemleri burada yapılacak
-  }
-
-  void _editTreatment(TreatmentModel treatment) {
+  void _editTreatment([TreatmentModel? treatment]) {
     // Düzenlenecek tedavinin bilgileriyle EditTreatmentPage'e yönlendirme yap
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditTreatmentPage(
           animal: AnimalModel(), // Burada bir hayvan modeli geçmeniz gerekecek
-          treatment: treatment,
+          treatment: treatment!,
         ),
       ),
     );
-  }
-
-  void _selectAnimalAndEditTreatment() async {
-    final selectedAnimal = await showDialog<AnimalModel>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Hayvanı Seç'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Lütfen tedaviyi düzenlemek istediğiniz hayvanı seçin:'),
-              SizedBox(height: 20),
-              DropdownButtonFormField<AnimalModel>(
-                value: widget.selectedAnimals.isNotEmpty ? widget.selectedAnimals.first : null,
-                onChanged: (selectedAnimal) {
-                  Navigator.pop(context, selectedAnimal);
-                },
-                items: widget.selectedAnimals.map((animal) {
-                  return DropdownMenuItem<AnimalModel>(
-                    value: animal,
-                    child: Text(animal.earringNumber ?? ""),
-                  );
-                }).toList(),
-                decoration: InputDecoration(
-                  labelText: 'Hayvan',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Dialog'u kapat
-              },
-              child: Text('İptal'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (selectedAnimal != null) {
-      // Seçilen hayvan varsa, tedaviyi düzenlemek için ilgili sayfayı aç
-      _editTreatment(selectedAnimal as TreatmentModel);
-    }
   }
 }

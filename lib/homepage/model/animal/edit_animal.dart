@@ -24,7 +24,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late int? _paddockNumber;
   late List<AnimalTypeModel> animalType = [];
   late List<AnimalRaceModel> animalRace = [];
-  //late String _race;
   late String _buildDescription;
   late String? _rfid;
   final int updateUserId = 1;
@@ -45,7 +44,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     _earringNumber = widget.animal.earringNumber ?? '';
     _birthDate = widget.animal.birthDate ?? DateTime.now();
     _paddockNumber = widget.animal.paddockId;
-    //_race = widget.animal.origin ?? '';
     _buildDescription = widget.animal.buildDescription ?? '';
     _rfid = widget.animal.rfid ?? '';
     _selectedType = animalType.firstWhereOrNull((element) => element.id == _selectedTypeId); // _selectedType ataması yapıldı
@@ -292,7 +290,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
         setState(() {
           animalType = responseData.map((json) => AnimalTypeModel.fromJson(json))
               .toList();
-
         });
       } else {
         throw Exception("Http hatası");

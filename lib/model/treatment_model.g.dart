@@ -31,7 +31,7 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
       insertDate: json['insertDate'] == null
           ? null
           : DateTime.parse(json['insertDate'] as String),
-      updateUser: json['updateUser'] as int,
+      updateUser: json['updateUser'] as int?,
       updateUserDescription: json['updateUserDescription'] as String?,
       updateDate: json['updateDate'] == null
           ? null
@@ -43,28 +43,29 @@ Map<String, dynamic> _$TreatmentModelToJson(TreatmentModel instance) =>
       'id': instance.id,
       'treatmentStatus': _$TreatmentStatusEnumMap[instance.treatmentStatus]!,
       'animalID': instance.animalID,
-      'animalEarringNumber': instance.animalEarringNumber ?? "",
-      'paddockName': instance.paddockName ?? "",
+      'animalEarringNumber': instance.animalEarringNumber,
+      'paddockName': instance.paddockName,
       'date': instance.date.toIso8601String(),
       'diseaseDiagnoseId': instance.diseaseDiagnoseId,
-      'diseaseDiagnoseDescription': instance.diseaseDiagnoseDescription ?? "",
-      'notes': instance.notes ?? "",
+      'diseaseDiagnoseDescription': instance.diseaseDiagnoseDescription,
+      'notes': instance.notes,
       'endUserId': instance.endUserId,
-      'endUserDescription': instance.endUserDescription ?? "",
+      'endUserDescription': instance.endUserDescription,
       'endDate': instance.endDate?.toIso8601String(),
       'treatmentEndType': _$TreatmentEndTypeEnumMap[instance.treatmentEndType],
-      'treatmentEndMessage': instance.treatmentEndMessage ?? "",
+      'treatmentEndMessage': instance.treatmentEndMessage,
       'insertUser': instance.insertUser,
-      'insertUserDescription': instance.insertUserDescription ?? "",
+      'insertUserDescription': instance.insertUserDescription,
       'insertDate': instance.insertDate?.toIso8601String(),
       'updateUser': instance.updateUser,
-      'updateUserDescription': instance.updateUserDescription ?? "",
+      'updateUserDescription': instance.updateUserDescription,
       'updateDate': instance.updateDate?.toIso8601String(),
     };
 
 const _$TreatmentStatusEnumMap = {
   TreatmentStatus.NewTreatment: 0,
   TreatmentStatus.EndedTreatment: 1,
+  TreatmentStatus.Finished : 2,
 };
 
 const _$TreatmentEndTypeEnumMap = {
