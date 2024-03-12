@@ -230,7 +230,7 @@ class _AnimalSearchWidgetState extends State<AnimalSearchWidget> {
             context,
             MaterialPageRoute(
               builder: (context) => AnimalCard(
-                animal: animal ),
+                  animal: animal ),
             ),
           );
         } else {

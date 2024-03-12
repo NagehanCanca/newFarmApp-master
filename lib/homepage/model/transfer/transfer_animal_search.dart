@@ -1,60 +1,71 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:farmsoftnew/model/animal_model.dart';
+import 'package:farmsoftnew/homepage/model/transfer/transfer_selection.dart';
 import 'package:flutter/material.dart';
-import '../../../model/base_cache_manager.dart';
+import 'package:dio/dio.dart';
+
+import '../../../model/animal_model.dart';
 import '../../../model/building_model.dart';
-import '../../../model/section_model.dart';
 import '../../../model/paddock_model.dart';
-import '../../../model/transfer_model.dart';
+import '../../../model/section_model.dart';
 import '../../../service/base.service.dart';
+import '../animal/animal_card_test.dart';
+import '../animal/animals_list.dart';
 
-class TransferPage extends StatefulWidget {
-  final AnimalModel selectedAnimal;
-
-  TransferPage({required this.selectedAnimal});
-
+class TransferAnimalSearchWidget extends StatefulWidget {
   @override
-  _TransferPageState createState() => _TransferPageState();
+  _TransferAnimalSearchWidgetState createState() => _TransferAnimalSearchWidgetState();
 }
 
-class _TransferPageState extends State<TransferPage> {
-  late List<BuildingModel> buildings;
-  late List<SectionModel> sections;
-  late List<PaddockModel> paddocks;
-  late AnimalModel selectedAnimal;
-  late BuildingModel? selectedBuilding;
-  late SectionModel? selectedSection;
-  late PaddockModel? selectedPaddock;
-  late TransferModel? _transferInfo;
+class _TransferAnimalSearchWidgetState extends State<TransferAnimalSearchWidget> {
+  TextEditingController searchController = TextEditingController();
+  AnimalModel? selectedAnimal;
+  List<BuildingModel> buildings = [];
+  List<SectionModel> sections = [];
+  List<PaddockModel> paddocks = [];
+  BuildingModel? selectedBuilding;
+  SectionModel? selectedSection;
+  PaddockModel? selectedPaddock;
+  String animalRfid = "";
 
   @override
   void initState() {
     super.initState();
-    buildings = [];
-    sections = [];
-    paddocks = [];
-    selectedAnimal = AnimalModel(); // Boş bir hayvan nesnesi oluşturuluyor
-    selectedBuilding = null;
-    selectedSection = null;
-    selectedPaddock = null;
-    _fetchBuildings(); // Binaları getiren metodu çağırılıyor
+    _fetchBuildings();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transfer'),
+        title: Text('Transfer İşlemleri - Hayvan Arama'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextFormField(
+              controller: searchController,
+              decoration: const InputDecoration(
+                hintText: 'RFID Giriniz',
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _searchAnimal,
+              child: const Text('Hayvan Ara'),
+            ),
+            const SizedBox(height: 16),
+            if (selectedAnimal != null) ...[
+              const SizedBox(height: 32),
+              ListTile(
+                title: Text(selectedAnimal!.animalTypeDescription ?? ''),
+                subtitle: Text(selectedAnimal!.buildDescription ?? ''),
+              ),
+            ],
             DropdownButtonFormField<BuildingModel>(
               value: selectedBuilding,
-              hint: Text('Bina Seçiniz'),
+              hint: const Text('Bina Seçiniz'),
               items: buildings
                   .map((building) => DropdownMenuItem(
                 value: building,
@@ -74,10 +85,10 @@ class _TransferPageState extends State<TransferPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<SectionModel>(
               value: selectedSection,
-              hint: Text('Bölüm Seçiniz'),
+              hint: const Text('Bölüm Seçiniz'),
               items: sections
                   .map((section) => DropdownMenuItem(
                 value: section,
@@ -95,10 +106,10 @@ class _TransferPageState extends State<TransferPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<PaddockModel>(
               value: selectedPaddock,
-              hint: Text('Paddock Seçiniz'),
+              hint: const Text('Padok Seçiniz'),
               items: paddocks
                   .map((paddock) => DropdownMenuItem(
                 value: paddock,
@@ -111,21 +122,25 @@ class _TransferPageState extends State<TransferPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 if (selectedPaddock != null) {
-                  _transferAnimalToPaddock(selectedPaddock!.id!);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TransferAnimalSelectionPage(paddockId: selectedPaddock!.id!),
+                    ),
+                  );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Lütfen bir paddock seçiniz.'),
-                      duration: Duration(seconds: 2),
+                      content: Text('Lütfen bir padok seçin'),
                     ),
                   );
                 }
               },
-              child: Text('Transfer Et'),
+              child: const Text('Hayvanları Listele '),
             ),
           ],
         ),
@@ -149,7 +164,6 @@ class _TransferPageState extends State<TransferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Binalar getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -171,7 +185,6 @@ class _TransferPageState extends State<TransferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Bölümler getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -193,41 +206,42 @@ class _TransferPageState extends State<TransferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Paddock\'lar getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
         ),
       );
     }
   }
 
-  void _transferAnimalToPaddock(int paddockId) async {
+  Future<void> _searchAnimal() async {
     try {
-      Response response = await dio.put(
-        "Animal/UpdateAnimalPaddockTransfer",
+      Response response = await dio.get(
+        "Animal/GetAnimalByRfIdOrEarringNumber",
         queryParameters: {
-          "updateUserId": cachemanager.getItem(0)?.id,
-          "newPaddockId": paddockId,
+          "identityNumber": searchController.text,
         },
-        data: selectedAnimal.toJson(),
       );
       if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hayvan başarıyla transfer edildi'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.pop(context, selectedAnimal);
-      } else {
-        throw Exception('Transfer işlemi başarısız oldu: ${response.statusCode}');
+        if (response.data != null) {
+          AnimalModel animal = AnimalModel.fromJson(response.data);
+          setState(() {
+            selectedAnimal = animal;
+          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AnimalCard(animal: animal),
+            ),
+          );
+        } else {
+          setState(() {
+            animalRfid = "Bulunmuyor";
+          });
+        }
       }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hayvan transfer edilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    } catch (e, stackTrace) {
+      print('Hata: $e, $stackTrace');
+      setState(() {
+        animalRfid = "Bir hata oluştu";
+      });
     }
   }
 }

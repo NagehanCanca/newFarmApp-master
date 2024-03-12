@@ -1,51 +1,43 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:farmsoftnew/model/animal_model.dart';
 import 'package:flutter/material.dart';
+import '../../../model/animal_model.dart';
 import '../../../model/base_cache_manager.dart';
 import '../../../model/building_model.dart';
-import '../../../model/section_model.dart';
 import '../../../model/paddock_model.dart';
-import '../../../model/transfer_model.dart';
+import '../../../model/section_model.dart';
 import '../../../service/base.service.dart';
 
-class TransferPage extends StatefulWidget {
+class NextSelectionScreen extends StatefulWidget {
   final AnimalModel selectedAnimal;
+  final String operationType;
 
-  TransferPage({required this.selectedAnimal});
+  NextSelectionScreen({required this.selectedAnimal, required this.operationType});
 
   @override
-  _TransferPageState createState() => _TransferPageState();
+  _NextSelectionScreenState createState() => _NextSelectionScreenState();
 }
 
-class _TransferPageState extends State<TransferPage> {
-  late List<BuildingModel> buildings;
-  late List<SectionModel> sections;
-  late List<PaddockModel> paddocks;
-  late AnimalModel selectedAnimal;
-  late BuildingModel? selectedBuilding;
-  late SectionModel? selectedSection;
-  late PaddockModel? selectedPaddock;
-  late TransferModel? _transferInfo;
+class _NextSelectionScreenState extends State<NextSelectionScreen> {
+  BuildingModel? selectedBuilding;
+  SectionModel? selectedSection;
+  PaddockModel? selectedPaddock;
+
+  List<BuildingModel> buildings = [];
+  List<SectionModel> sections = [];
+  List<PaddockModel> paddocks = [];
 
   @override
   void initState() {
     super.initState();
-    buildings = [];
-    sections = [];
-    paddocks = [];
-    selectedAnimal = AnimalModel(); // Boş bir hayvan nesnesi oluşturuluyor
-    selectedBuilding = null;
-    selectedSection = null;
-    selectedPaddock = null;
-    _fetchBuildings(); // Binaları getiren metodu çağırılıyor
+    _fetchBuildings();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transfer'),
+        title: Text('Bina, Bölüm ve Padok Seçimi'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,7 +46,7 @@ class _TransferPageState extends State<TransferPage> {
           children: [
             DropdownButtonFormField<BuildingModel>(
               value: selectedBuilding,
-              hint: Text('Bina Seçiniz'),
+              hint: const Text('Bina Seçiniz'),
               items: buildings
                   .map((building) => DropdownMenuItem(
                 value: building,
@@ -74,10 +66,10 @@ class _TransferPageState extends State<TransferPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<SectionModel>(
               value: selectedSection,
-              hint: Text('Bölüm Seçiniz'),
+              hint: const Text('Bölüm Seçiniz'),
               items: sections
                   .map((section) => DropdownMenuItem(
                 value: section,
@@ -95,10 +87,10 @@ class _TransferPageState extends State<TransferPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<PaddockModel>(
               value: selectedPaddock,
-              hint: Text('Paddock Seçiniz'),
+              hint: const Text('Padok Seçiniz'),
               items: paddocks
                   .map((paddock) => DropdownMenuItem(
                 value: paddock,
@@ -111,21 +103,23 @@ class _TransferPageState extends State<TransferPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                if (selectedPaddock != null) {
-                  _transferAnimalToPaddock(selectedPaddock!.id!);
-                } else {
+                // Check if all selections are made
+                if (selectedBuilding == null || selectedSection == null || selectedPaddock == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Lütfen bir paddock seçiniz.'),
-                      duration: Duration(seconds: 2),
+                      content: Text('Lütfen bina, bölüm ve padok seçimlerini tamamlayın.'),
                     ),
                   );
+                  return;
                 }
+
+                // Perform transfer operation
+                _transferAnimalToPaddock(selectedPaddock!.id!);
               },
-              child: Text('Transfer Et'),
+              child: Text('İleri'),
             ),
           ],
         ),
@@ -149,7 +143,6 @@ class _TransferPageState extends State<TransferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Binalar getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -171,7 +164,6 @@ class _TransferPageState extends State<TransferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Bölümler getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -179,6 +171,7 @@ class _TransferPageState extends State<TransferPage> {
 
   Future<void> _fetchPaddocks(int sectionId) async {
     try {
+
       Response response = await dio.get("Paddock?sectionId=$sectionId");
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
@@ -193,12 +186,10 @@ class _TransferPageState extends State<TransferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Paddock\'lar getirilirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
         ),
       );
     }
   }
-
   void _transferAnimalToPaddock(int paddockId) async {
     try {
       Response response = await dio.put(
@@ -207,7 +198,7 @@ class _TransferPageState extends State<TransferPage> {
           "updateUserId": cachemanager.getItem(0)?.id,
           "newPaddockId": paddockId,
         },
-        data: selectedAnimal.toJson(),
+        data: widget.selectedAnimal.toJson(),
       );
       if (response.statusCode == HttpStatus.ok) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -216,7 +207,7 @@ class _TransferPageState extends State<TransferPage> {
             duration: Duration(seconds: 2),
           ),
         );
-        Navigator.pop(context, selectedAnimal);
+        Navigator.pop(context); // Geri dönüş yap
       } else {
         throw Exception('Transfer işlemi başarısız oldu: ${response.statusCode}');
       }
@@ -230,4 +221,5 @@ class _TransferPageState extends State<TransferPage> {
       );
     }
   }
+
 }

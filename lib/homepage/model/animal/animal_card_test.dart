@@ -131,13 +131,16 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-
-    return SingleChildScrollView(
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Scaffold(
+        appBar: AppBar(
+        title: Text('Hayvan Kartı'),
+    ),
+    body: SingleChildScrollView(
+    child: Card(
+    elevation: 4,
+    margin: const EdgeInsets.all(8),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ClipPath(
               clipper: BezierImageClipper(),
@@ -317,6 +320,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
           ],
         ),
       ),
+    ),
     );
   }
 

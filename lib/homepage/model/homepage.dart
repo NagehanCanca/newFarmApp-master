@@ -60,7 +60,7 @@ class HomePage {
       //rating: 4.9,
     ),
     HomePage(
-      imagePath: 'assets/images/transfer.jpg',
+      imagePath: 'assets/images/transfer.png',
       title: 'Transfer İşlemleri',
       lessonCount: 12,
       //money: 25,

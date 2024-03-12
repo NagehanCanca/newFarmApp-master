@@ -287,7 +287,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
       Response response = await dio.get(
         'AnimalType/GetAllAnimalTypes',
       );
-
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data; // API'den gelen veri listesi
         setState(() {
@@ -295,8 +294,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
               .toList();
 
         });
-
-
       } else {
         throw Exception("Http hatası");
       }
@@ -311,16 +308,12 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
       Response response = await dio.get(
         'AnimalRace/GetAllAnimalRaces',
       );
-
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data; // API'den gelen veri listesi
         setState(() {
           animalRace = responseData.map((json) => AnimalRaceModel.fromJson(json))
               .toList();
-
         });
-
-
       } else {
         throw Exception("Http hatası");
       }

@@ -1,6 +1,8 @@
-import 'package:farmsoftnew/homepage/model/bulk/bulk_operations.dart';
+import 'package:farmsoftnew/homepage/model/animalReport/all_reports.dart';
 import 'package:flutter/material.dart';
 import 'package:farmsoftnew/screens/weighing/weighing_confirmation_page.dart';
+import '../transfer/transfer_operations.dart';
+import '../treatment/treatment.dart';
 import 'animal_search.dart';
 import 'animal_test.dart';
 
@@ -11,26 +13,19 @@ class SideBarMenu extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Colors.blue,
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/Loya.png'),
+                fit: BoxFit.contain,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/LoyaLogoTp.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: 8),
+                Text(
                   'Loya Yazılım',
                   style: TextStyle(
                     color: Colors.white,
@@ -40,9 +35,31 @@ class SideBarMenu extends StatelessWidget {
               ],
             ),
           ),
+          const ListTile(
+            title: Text(
+              'Genel İşlemler',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+          const Divider( // İşlemler ile diğer ListTile'ları ayırmak için çizgi ekledim
+            color: Colors.black,
+            thickness: 1,
+          ),
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Anasayfa'),
+            leading: const CircleAvatar(
+              backgroundImage: AssetImage('assets/images/home.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Anasayfa',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -50,9 +67,20 @@ class SideBarMenu extends StatelessWidget {
               );
             },
           ),
+          SizedBox(height: 10),
           ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('Hayvan Arama'),
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/search.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Hayvan Arama',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -60,9 +88,41 @@ class SideBarMenu extends StatelessWidget {
               );
             },
           ),
+          SizedBox(height: 10),
           ListTile(
-            leading: const Icon(Icons.scale),
-            title: const Text('Tartı'),
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/health.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Tedavi',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TreatmentPage(selectedAnimals: [],)),
+              );
+            },
+          ),
+          SizedBox(height: 10), // Boşluk ekledik
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/scale.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Tartı',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -71,16 +131,87 @@ class SideBarMenu extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.playlist_add),
-            title: const Text('Toplu İşlemler'),
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/transfer.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Transfer',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BulkOperationSelectionScreen()),
+                MaterialPageRoute(builder: (context) => TransferOperationsPage()),
               );
             },
           ),
-          // Diğer menü öğelerini buraya ekleyebilirsiniz
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/vaccines.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Aşı',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => WeighingConfirmationPage()),
+              );
+            },
+          ),
+          SizedBox(height: 10), // Boşluk ekledik
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/report.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'İhbar',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationListPage()),
+              );
+            },
+          ),
+          SizedBox(height: 10), // Boşluk ekledik
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/list.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Hayvan Listesi',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => WeighingConfirmationPage()),
+              );
+            },
+          ),
         ],
       ),
     );
