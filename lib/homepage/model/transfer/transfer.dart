@@ -45,7 +45,7 @@ class _TransferPageState extends State<TransferPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transfer'),
+        title: const Text('Transfer'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,7 +54,7 @@ class _TransferPageState extends State<TransferPage> {
           children: [
             DropdownButtonFormField<BuildingModel>(
               value: selectedBuilding,
-              hint: Text('Bina Seçiniz'),
+              hint: const Text('Bina Seçiniz'),
               items: buildings
                   .map((building) => DropdownMenuItem(
                 value: building,
@@ -77,7 +77,7 @@ class _TransferPageState extends State<TransferPage> {
             SizedBox(height: 16),
             DropdownButtonFormField<SectionModel>(
               value: selectedSection,
-              hint: Text('Bölüm Seçiniz'),
+              hint: const Text('Bölüm Seçiniz'),
               items: sections
                   .map((section) => DropdownMenuItem(
                 value: section,
@@ -98,7 +98,7 @@ class _TransferPageState extends State<TransferPage> {
             SizedBox(height: 16),
             DropdownButtonFormField<PaddockModel>(
               value: selectedPaddock,
-              hint: Text('Paddock Seçiniz'),
+              hint: const Text('Paddock Seçiniz'),
               items: paddocks
                   .map((paddock) => DropdownMenuItem(
                 value: paddock,
@@ -125,7 +125,7 @@ class _TransferPageState extends State<TransferPage> {
                   );
                 }
               },
-              child: Text('Transfer Et'),
+              child: const Text('Transfer Et'),
             ),
           ],
         ),

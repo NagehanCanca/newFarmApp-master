@@ -1,20 +1,23 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:farmsoftnew/homepage/model/transfer/bulk_transfer.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
+import '../../../model/base_cache_manager.dart';
+import '../../../model/building_model.dart';
+import '../../../model/paddock_model.dart';
+import '../../../model/section_model.dart';
 import '../../../service/base.service.dart';
 
-class TransferAnimalSelectionPage extends StatefulWidget {
+class BulkTransferPage extends StatefulWidget {
   final int paddockId;
 
-  TransferAnimalSelectionPage({Key? key, required this.paddockId}) : super(key: key);
+  BulkTransferPage({Key? key, required this.paddockId}) : super(key: key);
 
   @override
-  _TransferAnimalSelectionPageState createState() => _TransferAnimalSelectionPageState();
+  _BulkTransferPageState createState() => _BulkTransferPageState();
 }
 
-class _TransferAnimalSelectionPageState extends State<TransferAnimalSelectionPage> {
+class _BulkTransferPageState extends State<BulkTransferPage> {
   List<AnimalModel> animalList = [];
   List<AnimalModel> selectedAnimals = [];
 
@@ -44,7 +47,7 @@ class _TransferAnimalSelectionPageState extends State<TransferAnimalSelectionPag
           ),
           IconButton(
             icon: const Icon(Icons.arrow_forward),
-            onPressed: () => BulkTransferPage(paddockId: widget.paddockId,),
+            onPressed: () => _transferSelectedAnimals(),
           ),
         ],
       ),
@@ -140,5 +143,54 @@ class _TransferAnimalSelectionPageState extends State<TransferAnimalSelectionPag
         ),
       );
     }
+  }
+
+  Future<void> _transferSelectedAnimals() async {
+    if (selectedAnimals.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lütfen en az bir hayvan seçiniz.'),
+        ),
+      );
+      return;
+    }
+
+    for (AnimalModel animal in selectedAnimals) {
+      try {
+        Response response = await dio.put(
+          "Animal/UpdateAnimalPaddockTransfer",
+          queryParameters: {
+            "updateUserId": cachemanager.getItem(0)?.id,
+            "newPaddockId": widget.paddockId, // Kullanıcının seçtiği paddockId
+          },
+          data: animal.toJson(),
+        );
+        if (response.statusCode == HttpStatus.ok) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Hayvan başarıyla transfer edildi'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          // Navigator.pop(context, animal); // Transfer işlemi tamamlandıktan sonra sayfadan çık
+          await Future.delayed(Duration(seconds: 2)); // 2 saniye bekleyerek kullanıcıyı bilgilendirme zamanı ver
+          Navigator.pop(context); // Transfer işlemi tamamlandıktan sonra sayfadan çık
+        } else {
+          throw Exception('Transfer işlemi başarısız oldu: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Hata: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hayvan transfer edilirken bir hata oluştu'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+    // Transfer işlemi tamamlandıktan sonra seçilen hayvanların listesini temizle
+    setState(() {
+      selectedAnimals.clear();
+    });
   }
 }

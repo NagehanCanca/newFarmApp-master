@@ -2,14 +2,12 @@ import 'dart:io';
 import 'package:farmsoftnew/homepage/model/transfer/transfer_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-
 import '../../../model/animal_model.dart';
 import '../../../model/building_model.dart';
 import '../../../model/paddock_model.dart';
 import '../../../model/section_model.dart';
 import '../../../service/base.service.dart';
 import '../animal/animal_card_test.dart';
-import '../animal/animals_list.dart';
 
 class TransferAnimalSearchWidget extends StatefulWidget {
   @override

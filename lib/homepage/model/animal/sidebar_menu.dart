@@ -146,7 +146,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TransferOperationsPage()),
+                MaterialPageRoute(builder: (context) => TransferOperationsPage(selectedAnimals: [],)),
               );
             },
           ),

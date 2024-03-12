@@ -29,7 +29,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tedavi Bilgileri'),
+        title: const Text('Tedavi Bilgileri'),
       ),
       body: _isLoading
           ? _buildLoadingIndicator()
@@ -111,7 +111,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
             DataCell(Text(treatment.diseaseDiagnoseDescription ?? '')),
             DataCell(
               IconButton(
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
                 onPressed: () {
                   _editTreatment(treatment); // Tedaviyi düzenle fonksiyonunu çağır
                 },
@@ -139,7 +139,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
           _treatments = responseData
               .map((json) => TreatmentModel.fromJson(json))
               .toList();
-          _isLoading = false; // Yükleme tamamlandı
+          _isLoading = false;
         });
       } else {
         throw Exception('HTTP Error: ${response.statusCode}');
@@ -155,12 +155,11 @@ class _TreatmentPageState extends State<TreatmentPage> {
   }
 
   void _editTreatment([TreatmentModel? treatment]) {
-    // Düzenlenecek tedavinin bilgileriyle EditTreatmentPage'e yönlendirme yap
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditTreatmentPage(
-          animal: AnimalModel(), // Burada bir hayvan modeli geçmeniz gerekecek
+          animal: AnimalModel(),
           treatment: treatment!,
         ),
       ),
