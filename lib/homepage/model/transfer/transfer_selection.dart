@@ -44,7 +44,14 @@ class _TransferAnimalSelectionPageState extends State<TransferAnimalSelectionPag
           ),
           IconButton(
             icon: const Icon(Icons.arrow_forward),
-            onPressed: () => BulkTransferPage(paddockId: widget.paddockId,),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BulkTransferPage(selectedAnimals: selectedAnimals),
+                ),
+              );
+            },
           ),
         ],
       ),

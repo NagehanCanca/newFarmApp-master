@@ -104,10 +104,10 @@ class _TreatmentPageState extends State<TreatmentPage> {
           cells: <DataCell>[
             DataCell(Text(treatment.id.toString() ?? '')),
             DataCell(Text(_formatDate(treatment.date))),
-            DataCell(Text(treatment.treatmentStatus.toString() ?? '')),
+            DataCell(Text(treatment.treatmentStatus?.toString() ?? '')),
             DataCell(Text(treatment.animalEarringNumber ?? '')),
             DataCell(Text(treatment.paddockName ?? '')),
-            DataCell(Text(treatment.diseaseDiagnoseId.toString() ?? '')),
+            DataCell(Text(treatment.diseaseDiagnoseId.toString())),
             DataCell(Text(treatment.diseaseDiagnoseDescription ?? '')),
             DataCell(
               IconButton(
@@ -124,8 +124,12 @@ class _TreatmentPageState extends State<TreatmentPage> {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
+  String _formatDate(DateTime? date) {
+    if (date != null) {
+      return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
+    } else {
+      return '';
+    }
   }
 
   Future<void> _fetchTreatmentsForSelectedAnimals() async {
@@ -142,10 +146,10 @@ class _TreatmentPageState extends State<TreatmentPage> {
           _isLoading = false;
         });
       } else {
-        throw Exception('HTTP Error: ${response.statusCode}');
+        throw Exception('HTTP Hatası: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching treatments: $e');
+      print('Tedaviler alınırken hata oluştu: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Tedavi bilgileri alınamadı'),
@@ -153,6 +157,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
       );
     }
   }
+
 
   void _editTreatment([TreatmentModel? treatment]) {
     Navigator.push(

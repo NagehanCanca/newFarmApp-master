@@ -9,161 +9,201 @@ import '../../../model/section_model.dart';
 import '../../../service/base.service.dart';
 
 class BulkTransferPage extends StatefulWidget {
-  final int paddockId;
+  AnimalModel? selectedAnimal;
+  final List<AnimalModel> selectedAnimals;
 
-  BulkTransferPage({Key? key, required this.paddockId}) : super(key: key);
-
+  BulkTransferPage({Key? key, required this.selectedAnimals}) : super(key: key);
   @override
   _BulkTransferPageState createState() => _BulkTransferPageState();
 }
 
 class _BulkTransferPageState extends State<BulkTransferPage> {
-  List<AnimalModel> animalList = [];
-  List<AnimalModel> selectedAnimals = [];
+  List<BuildingModel> buildings = [];
+  List<SectionModel> sections = [];
+  List<PaddockModel> paddocks = [];
+  BuildingModel? selectedBuilding;
+  SectionModel? selectedSection;
+  PaddockModel? selectedPaddock;
 
   @override
   void initState() {
     super.initState();
-    _fetchAnimals(widget.paddockId);
+    _fetchBuildings();
+  }
+
+  Future<void> _fetchBuildings() async {
+    try {
+      Response response = await dio.get("Building");
+      if (response.statusCode == HttpStatus.ok) {
+        final List<dynamic> responseData = response.data;
+        setState(() {
+          buildings =
+              responseData.map((json) => BuildingModel.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('HTTP Error ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error fetching buildings'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _fetchSections(int buildingId) async {
+    try {
+      Response response = await dio.get("Section?buildingId=$buildingId");
+      if (response.statusCode == HttpStatus.ok) {
+        final List<dynamic> responseData = response.data;
+        setState(() {
+          sections =
+              responseData.map((json) => SectionModel.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('HTTP Error ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error fetching sections'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _fetchPaddocks(int sectionId) async {
+    try {
+      Response response = await dio.get("Paddock?sectionId=$sectionId");
+      if (response.statusCode == HttpStatus.ok) {
+        final List<dynamic> responseData = response.data;
+        setState(() {
+          paddocks =
+              responseData.map((json) => PaddockModel.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('HTTP Error ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error fetching paddocks'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hayvan Seçimi'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check_box_outlined),
-            onPressed: () {
+        title: const Text('Transfer Sayfası'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: DropdownButtonFormField<BuildingModel>(
+              value: selectedBuilding,
+              hint: const Text('Bina Seçiniz'),
+              items: buildings
+                  .map((building) =>
+                  DropdownMenuItem(
+                    value: building,
+                    child: Text(building.description ?? ''),
+                  ))
+                  .toList(),
+              onChanged: (building) {
+                setState(() {
+                  selectedBuilding = building;
+                  selectedSection = null;
+                  selectedPaddock = null;
+                  sections.clear();
+                  paddocks.clear();
+                  if (building != null) {
+                    _fetchSections(building.id!);
+                  }
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<SectionModel>(
+            value: selectedSection,
+            hint: const Text('Bölüm Seçiniz'),
+            items: sections
+                .map((section) =>
+                DropdownMenuItem(
+                  value: section,
+                  child: Text(section.description ?? ''),
+                ))
+                .toList(),
+            onChanged: (section) {
               setState(() {
-                if (selectedAnimals.length < animalList.length) {
-                  selectedAnimals = List.from(animalList);
-                } else {
-                  selectedAnimals.clear();
+                selectedSection = section;
+                selectedPaddock = null;
+                paddocks.clear();
+                if (section != null) {
+                  _fetchPaddocks(section.id!);
                 }
               });
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: () => _transferSelectedAnimals(),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<PaddockModel>(
+            value: selectedPaddock,
+            hint: const Text('Padok Seçiniz'),
+            items: paddocks
+                .map((paddock) =>
+                DropdownMenuItem(
+                  value: paddock,
+                  child: Text(paddock.description ?? ''),
+                ))
+                .toList(),
+            onChanged: (paddock) {
+              setState(() {
+                selectedPaddock = paddock;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              if (widget.selectedAnimal != null) {
+                _transferAnimalToPaddock(selectedPaddock!.id!);
+              } else if (widget.selectedAnimals.isNotEmpty) {
+                _transferAnimalsInBulk(selectedPaddock!.id!);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lütfen bir hayvan seçin'),
+                  ),
+                );
+              }
+            },
+            child: Text('Transfer'),
           ),
         ],
       ),
-      body: _buildAnimalList(),
     );
   }
 
-  Widget _buildAnimalList() {
-    return ListView.builder(
-      itemCount: animalList.length,
-      itemBuilder: (context, index) {
-        final animal = animalList[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                if (selectedAnimals.contains(animal)) {
-                  selectedAnimals.remove(animal);
-                } else {
-                  selectedAnimals.add(animal);
-                }
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Checkbox(
-                    value: selectedAnimals.contains(animal),
-                    onChanged: (_) {
-                      setState(() {
-                        if (selectedAnimals.contains(animal)) {
-                          selectedAnimals.remove(animal);
-                        } else {
-                          selectedAnimals.add(animal);
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.pets, size: 48),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('RFID: ${animal.rfid}', style: const TextStyle(fontSize: 16)),
-                        const SizedBox(height: 8),
-                        Text('Küpe No: ${animal.earringNumber}', style: const TextStyle(fontSize: 16)),
-                        const SizedBox(height: 8),
-                        Text('Durum: ${animal.animalStatus.toString().split('.').last}', style: const TextStyle(fontSize: 16)),
-                        const SizedBox(height: 8),
-                        Text('Giriş Tarihi: ${_formatDate(animal.farmInsertDate!)}', style: const TextStyle(fontSize: 16)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
-  String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
-  }
-
-  Future<void> _fetchAnimals(int paddockID) async {
-    try {
-      Response response = await dio.get(
-        "Animal/GetAllByPaddockId",
-        queryParameters: {
-          "paddockID": paddockID,
-        },
-      );
-      if (response.statusCode == HttpStatus.ok) {
-        List<dynamic> responseData = response.data;
-        setState(() {
-          animalList = responseData.map((json) => AnimalModel.fromJson(json)).toList();
-        });
-      } else {
-        throw Exception('HTTP Error: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error fetching animal list'),
-        ),
-      );
-    }
-  }
-
-  Future<void> _transferSelectedAnimals() async {
-    if (selectedAnimals.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lütfen en az bir hayvan seçiniz.'),
-        ),
-      );
-      return;
-    }
-
-    for (AnimalModel animal in selectedAnimals) {
+  void _transferAnimalToPaddock(int paddockId) async {
+    if (widget.selectedAnimal != null) {
       try {
         Response response = await dio.put(
           "Animal/UpdateAnimalPaddockTransfer",
           queryParameters: {
             "updateUserId": cachemanager.getItem(0)?.id,
-            "newPaddockId": widget.paddockId, // Kullanıcının seçtiği paddockId
+            "newPaddockId": paddockId,
           },
-          data: animal.toJson(),
+          data: widget.selectedAnimal!.toJson(),
         );
         if (response.statusCode == HttpStatus.ok) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -172,9 +212,7 @@ class _BulkTransferPageState extends State<BulkTransferPage> {
               duration: Duration(seconds: 2),
             ),
           );
-          // Navigator.pop(context, animal); // Transfer işlemi tamamlandıktan sonra sayfadan çık
-          await Future.delayed(Duration(seconds: 2)); // 2 saniye bekleyerek kullanıcıyı bilgilendirme zamanı ver
-          Navigator.pop(context); // Transfer işlemi tamamlandıktan sonra sayfadan çık
+          Navigator.pop(context, widget.selectedAnimal);
         } else {
           throw Exception('Transfer işlemi başarısız oldu: ${response.statusCode}');
         }
@@ -187,10 +225,45 @@ class _BulkTransferPageState extends State<BulkTransferPage> {
           ),
         );
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lütfen bir hayvan seçin'),
+        ),
+      );
     }
-    // Transfer işlemi tamamlandıktan sonra seçilen hayvanların listesini temizle
-    setState(() {
-      selectedAnimals.clear();
-    });
+  }
+
+  void _transferAnimalsInBulk(int paddockId) async {
+    for (var animal in widget.selectedAnimals) {
+      try {
+        Response response = await dio.put(
+          "Animal/UpdateAnimalPaddockTransfer",
+          queryParameters: {
+            "updateUserId": cachemanager.getItem(0)?.id,
+            "newPaddockId": paddockId,
+          },
+          data: animal.toJson(),
+        );
+        if (response.statusCode != HttpStatus.ok) {
+          throw Exception('Transfer işlemi başarısız oldu: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Hata: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hayvan transfer edilirken bir hata oluştu'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Seçilen hayvanlar başarıyla transfer edildi'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    Navigator.pop(context);
   }
 }

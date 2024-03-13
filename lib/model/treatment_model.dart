@@ -7,19 +7,19 @@ class TreatmentModel {
   int id;
   TreatmentStatus treatmentStatus;
   int animalID;
-  String? animalEarringNumber;
-  String? paddockName;
+  String animalEarringNumber;
+  String paddockName;
   DateTime date;
   int diseaseDiagnoseId;
-  String? diseaseDiagnoseDescription;
-  String? notes;
+  String diseaseDiagnoseDescription;
+  String notes;
   int? endUserId;
   String? endUserDescription;
   DateTime? endDate;
   TreatmentEndType? treatmentEndType;
   String? treatmentEndMessage;
   int insertUser;
-  String? insertUserDescription;
+  String insertUserDescription;
   DateTime? insertDate;
   int? updateUser;
   String? updateUserDescription;
@@ -29,19 +29,19 @@ class TreatmentModel {
     required this.id,
     required this.treatmentStatus,
     required this.animalID,
-    this.animalEarringNumber,
-    this.paddockName,
+    required this.animalEarringNumber,
+    required this.paddockName,
     required this.date,
     required this.diseaseDiagnoseId,
-    this.diseaseDiagnoseDescription,
-    this.notes,
+    required this.diseaseDiagnoseDescription,
+    required this.notes,
     this.endUserId,
     this.endUserDescription,
     this.endDate,
     this.treatmentEndType,
     this.treatmentEndMessage,
     required this.insertUser,
-    this.insertUserDescription,
+    required this.insertUserDescription,
     this.insertDate,
     this.updateUser,
     this.updateUserDescription,
@@ -53,13 +53,14 @@ class TreatmentModel {
   Map<String, dynamic> toJson() => _$TreatmentModelToJson(this);
 }
 
+
 enum TreatmentEndType {
   Cured,
   ToFollow,
   Ex,
 }
+
 enum TreatmentStatus {
   NewTreatment,
   EndedTreatment,
-  Finished,
 }

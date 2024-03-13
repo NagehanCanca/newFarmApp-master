@@ -12,12 +12,12 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
       treatmentStatus:
           $enumDecode(_$TreatmentStatusEnumMap, json['treatmentStatus']),
       animalID: json['animalID'] as int,
-      animalEarringNumber: json['animalEarringNumber'] as String?,
-      paddockName: json['paddockName'] as String?,
+      animalEarringNumber: json['animalEarringNumber'] ?? '',
+      paddockName: json['paddockName'] as String,
       date: DateTime.parse(json['date'] as String),
       diseaseDiagnoseId: json['diseaseDiagnoseId'] as int,
-      diseaseDiagnoseDescription: json['diseaseDiagnoseDescription'] as String?,
-      notes: json['notes'] as String?,
+      diseaseDiagnoseDescription: json['diseaseDiagnoseDescription'] ?? '',
+      notes: json['notes'] ?? '',
       endUserId: json['endUserId'] as int?,
       endUserDescription: json['endUserDescription'] as String?,
       endDate: json['endDate'] == null
@@ -25,9 +25,9 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['endDate'] as String),
       treatmentEndType: $enumDecodeNullable(
           _$TreatmentEndTypeEnumMap, json['treatmentEndType']),
-      treatmentEndMessage: json['treatmentEndMessage'] as String?,
+      treatmentEndMessage: json['treatmentEndMessage'] ?? '',
       insertUser: json['insertUser'] as int,
-      insertUserDescription: json['insertUserDescription'] as String?,
+      insertUserDescription: json['insertUserDescription'] as String,
       insertDate: json['insertDate'] == null
           ? null
           : DateTime.parse(json['insertDate'] as String),
@@ -65,7 +65,6 @@ Map<String, dynamic> _$TreatmentModelToJson(TreatmentModel instance) =>
 const _$TreatmentStatusEnumMap = {
   TreatmentStatus.NewTreatment: 0,
   TreatmentStatus.EndedTreatment: 1,
-  TreatmentStatus.Finished : 2,
 };
 
 const _$TreatmentEndTypeEnumMap = {

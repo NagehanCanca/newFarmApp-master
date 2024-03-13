@@ -45,6 +45,7 @@ class TransferModel {
     required this.updateUser,
     this.updateDate,
   });
+
   String oldPaddockString(){
     String mesaj ="";
     if(oldBuilding != '') {

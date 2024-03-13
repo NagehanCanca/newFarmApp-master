@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/treatment_model.dart';
 import '../../../service/base.service.dart';
+import 'end_treatment.dart';
 
 class EditTreatmentPage extends StatefulWidget {
   final AnimalModel animal;
@@ -60,7 +61,14 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: _endTreatment,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EndTreatmentPage(),
+                      ),
+                    );
+                  },
                   child: Text('Tedaviyi Sonlandır'),
                 ),
                 ElevatedButton(
@@ -201,35 +209,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     } catch (e) {
       print('Hata: $e');
       throw Exception('Veri alınırken bir hata oluştu');
-    }
-  }
-
-
-  void _endTreatment() async {
-    try {
-      Response response = await dio.post(
-        'Treatment/FinishAnimalTreatment?treatmentId=${widget.treatment.id}',
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tedavi başarıyla sonlandırıldı'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.pop(context); // Önceki sayfaya geri dön
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tedavi sonlandırılırken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
     }
   }
 
