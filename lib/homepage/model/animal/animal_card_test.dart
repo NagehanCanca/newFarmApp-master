@@ -78,7 +78,8 @@ class BezierImageClipper extends CustomClipper<Path> {
     path.lineTo(0, size.height - 50);
     var controlPoint = Offset(50, size.height);
     var endPoint = Offset(size.width / 2, size.height);
-    path.quadraticBezierTo(controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
+    path.quadraticBezierTo(
+        controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 0);
     path.close();
@@ -91,10 +92,8 @@ class BezierImageClipper extends CustomClipper<Path> {
   }
 }
 
-
 class AnimalCard extends StatefulWidget {
   final AnimalModel animal;
-
 
   const AnimalCard({Key? key, required this.animal}) : super(key: key);
 
@@ -102,225 +101,227 @@ class AnimalCard extends StatefulWidget {
   _AnimalCardState createState() => _AnimalCardState();
 }
 
-class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateMixin {
+class _AnimalCardState extends State<AnimalCard>
+    with SingleTickerProviderStateMixin {
   late TreatmentModel selectedTreatment;
   late List<TransferModel> transferInfo = [];
-
-  //File? _image;
-  //late List<AnimalTypeModel> animalType = [];
-  //late List<AnimalRaceModel> animalRace = [];
   final base64Decoder = base64.decoder;
   final base64Encoder = base64.encoder;
   late String _image;
   final picker = ImagePicker();
   late TabController _tabController;
   final int updateUserId = 1;
-  //late AnimalModel selectedAnimal;
-
 
   @override
   void initState() {
     _image = widget.animal.image ?? '';
     _tabController = TabController(length: 5, vsync: this);
     super.initState();
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text('Hayvan Kartı'),
-    ),
-    body: SingleChildScrollView(
-    child: Card(
-    elevation: 4,
-    margin: const EdgeInsets.all(8),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ClipPath(
-              clipper: BezierImageClipper(),
-              child: Stack(
-                children: [
-                  _image.isEmpty
-                      ? Container(
-                    height: 200,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: AssetImage('assets/images/sığır.jpg'),
+      ),
+      body: SingleChildScrollView(
+        child: Card(
+          elevation: 4,
+          margin: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ClipPath(
+                clipper: BezierImageClipper(),
+                child: Stack(
+                  children: [
+                    _image.isEmpty
+                        ? Container(
+                            height: 200,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: AssetImage('assets/images/sığır.jpg'),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: 200,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image:
+                                    Image.memory(base64Decoder.convert(_image))
+                                        .image,
+                              ),
+                            ),
+                          ),
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      child: ElevatedButton(
+                        onPressed: getImage,
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.amber,
+                          onPrimary: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                        child: const Icon(Icons.camera_alt),
                       ),
                     ),
-                  )
-                      : Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: Image.memory(base64Decoder.convert(_image)).image,
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EditAnimalPage(
+                                      animal: widget.animal,
+                                    )),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.amber, // Butonun arka plan rengi
+                          onPrimary: Colors.white, // Buton metin rengi
+                          shape: RoundedRectangleBorder(
+                            // Butonun şekli ve kavisleri
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Düzenle'),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    top: 16,
-                    left: 16,
-                    child: ElevatedButton(
-                      onPressed: getImage,
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Hayvan Türü: ${widget.animal.animalTypeId ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Küpe Numarası : ${widget.animal.earringNumber.toString().split('.').last}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Giriş Tarihi: ${_formatDate(widget.animal.farmInsertDate)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Padok : ${widget.animal.paddockDescription ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Menşei : ${widget.animal.origin.toString() ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Irkı: ${widget.animal.animalRaceId.toString() ?? ''}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Durum: ${widget.animal.animalStatus.toString().split('.').last}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        _showVaccineListBottomSheet(context);
+                      },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.amber,
+                        primary: Colors.green,
                         onPrimary: Colors.white,
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                       ),
-                      child: const Icon(Icons.camera_alt),
+                      child: const Text('Aşı uygula'),
                     ),
-                  ),
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: ElevatedButton(
+                    const SizedBox(height: 8),
+                    ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: ( context) => EditAnimalPage(animal: widget.animal,)),
-                        );
+                        _showTreatmentOptionsBottomSheet(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.amber, // Butonun arka plan rengi
-                        onPrimary: Colors.white, // Buton metin rengi
-                        shape: RoundedRectangleBorder( // Butonun şekli ve kavisleri
-                          borderRadius: BorderRadius.circular(10),
+                        primary: Colors.orange,
+                        onPrimary: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                       ),
-                      child: const Text('Düzenle'),
+                      child: const Text('Tedavi başlat'),
                     ),
-                  ),
-
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Hayvan Türü: ${widget.animal.animalTypeId ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Küpe Numarası : ${widget.animal.earringNumber.toString().split('.').last}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Giriş Tarihi: ${_formatDate(widget.animal.farmInsertDate)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Padok : ${widget.animal.paddockDescription ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Menşei : ${widget.animal.origin.toString() ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Irkı: ${widget.animal.animalRaceId.toString() ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Durum: ${widget.animal.animalStatus.toString().split('.').last}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      _showVaccineListBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.green,
-                      onPrimary: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                    ),
-                    child: const Text('Aşı uygula'),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      _showTreatmentOptionsBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.orange,
-                      onPrimary: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                    ),
-                    child: const Text('Tedavi başlat'),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      _showNotifyBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      onPrimary: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                    ),
-                    child: const Text('İhbar et'),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      _showTransferBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      onPrimary: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                    ), child: const Text('Transfer et'),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
+                    const SizedBox(height: 8),
+                    ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AnimalDetailsPage(animal: widget.animal)),
-                        );
+                        _showNotifyBottomSheet(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.blue, // Buton rengi
-                        onPrimary: Colors.white, // Buton metin rengi
+                        primary: Colors.red,
+                        onPrimary: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                       ),
-                      child: const Text('Hayvan Bilgileri'), // Buton metni
+                      child: const Text('İhbar et'),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        _showTransferBottomSheet(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                        onPrimary: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                      ),
+                      child: const Text('Transfer et'),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    AnimalDetailsPage(animal: widget.animal)),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.blue, // Buton rengi
+                          onPrimary: Colors.white, // Buton metin rengi
+                        ),
+                        child: const Text('Hayvan Bilgileri'), // Buton metni
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
-
 
   Future getImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
@@ -328,7 +329,7 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     setState(() async {
       if (pickedFile != null) {
         List<int> imageBytes = await pickedFile.readAsBytes();
-        _image  = base64Encoder.convert(imageBytes);
+        _image = base64Encoder.convert(imageBytes);
         widget.animal.image = _image;
         _saveImage();
       } else {
@@ -336,9 +337,9 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
       }
     });
   }
-  Future<void> _saveImage() async{
-    try{
 
+  Future<void> _saveImage() async {
+    try {
       Response response = await dio.put(
         "Animal/UpdateAnimalImage?updateUserId=$updateUserId",
         data: widget.animal.toJson(),
@@ -372,42 +373,41 @@ class _AnimalCardState extends State<AnimalCard> with SingleTickerProviderStateM
     }
   }
 
-
-
   void _showVaccineListBottomSheet(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AnimalVaccinationPage(animal: widget.animal)),
+      MaterialPageRoute(
+          builder: (context) => AnimalVaccinationPage(animal: widget.animal)),
     );
   }
+
   void _showTreatmentOptionsBottomSheet(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NewTreatmentPage(animal: widget.animal)),
+      MaterialPageRoute(
+          builder: (context) => NewTreatmentPage(animal: widget.animal)),
     );
   }
 
   void _showNotifyBottomSheet(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AnimalReportPage(animal: widget.animal,)),
+      MaterialPageRoute(
+          builder: (context) => AnimalReportPage(
+                animal: widget.animal,
+              )),
     );
   }
 
   void _showTransferBottomSheet(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TransferPage(selectedAnimal: widget.animal)),
+      MaterialPageRoute(
+          builder: (context) => TransferPage(selectedAnimal: widget.animal)),
     );
   }
 
   String _formatDate(DateTime? date) {
     return date != null ? date.toString().split(' ')[0] : '';
   }
-
-
-
 }
-
-
-

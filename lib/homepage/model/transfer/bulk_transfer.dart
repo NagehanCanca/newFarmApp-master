@@ -103,21 +103,20 @@ class _BulkTransferPageState extends State<BulkTransferPage> {
       appBar: AppBar(
         title: const Text('Transfer Sayfası'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: DropdownButtonFormField<BuildingModel>(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DropdownButtonFormField<BuildingModel>(
               value: selectedBuilding,
               hint: const Text('Bina Seçiniz'),
-              items: buildings
-                  .map((building) =>
+              items: buildings.map((building) =>
                   DropdownMenuItem(
                     value: building,
                     child: Text(building.description ?? ''),
-                  ))
-                  .toList(),
+                  ),
+              ).toList(),
               onChanged: (building) {
                 setState(() {
                   selectedBuilding = building;
@@ -131,67 +130,66 @@ class _BulkTransferPageState extends State<BulkTransferPage> {
                 });
               },
             ),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<SectionModel>(
-            value: selectedSection,
-            hint: const Text('Bölüm Seçiniz'),
-            items: sections
-                .map((section) =>
-                DropdownMenuItem(
-                  value: section,
-                  child: Text(section.description ?? ''),
-                ))
-                .toList(),
-            onChanged: (section) {
-              setState(() {
-                selectedSection = section;
-                selectedPaddock = null;
-                paddocks.clear();
-                if (section != null) {
-                  _fetchPaddocks(section.id!);
-                }
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<PaddockModel>(
-            value: selectedPaddock,
-            hint: const Text('Padok Seçiniz'),
-            items: paddocks
-                .map((paddock) =>
-                DropdownMenuItem(
-                  value: paddock,
-                  child: Text(paddock.description ?? ''),
-                ))
-                .toList(),
-            onChanged: (paddock) {
-              setState(() {
-                selectedPaddock = paddock;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              if (widget.selectedAnimal != null) {
-                _transferAnimalToPaddock(selectedPaddock!.id!);
-              } else if (widget.selectedAnimals.isNotEmpty) {
-                _transferAnimalsInBulk(selectedPaddock!.id!);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Lütfen bir hayvan seçin'),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<SectionModel>(
+              value: selectedSection,
+              hint: const Text('Bölüm Seçiniz'),
+              items: sections.map((section) =>
+                  DropdownMenuItem(
+                    value: section,
+                    child: Text(section.description ?? ''),
                   ),
-                );
-              }
-            },
-            child: Text('Transfer'),
-          ),
-        ],
+              ).toList(),
+              onChanged: (section) {
+                setState(() {
+                  selectedSection = section;
+                  selectedPaddock = null;
+                  paddocks.clear();
+                  if (section != null) {
+                    _fetchPaddocks(section.id!);
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<PaddockModel>(
+              value: selectedPaddock,
+              hint: const Text('Padok Seçiniz'),
+              items: paddocks.map((paddock) =>
+                  DropdownMenuItem(
+                    value: paddock,
+                    child: Text(paddock.description ?? ''),
+                  ),
+              ).toList(),
+              onChanged: (paddock) {
+                setState(() {
+                  selectedPaddock = paddock;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                if (widget.selectedAnimal != null) {
+                  _transferAnimalToPaddock(selectedPaddock!.id!);
+                } else if (widget.selectedAnimals.isNotEmpty) {
+                  _transferAnimalsInBulk(selectedPaddock!.id!);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lütfen bir hayvan seçin'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Transfer'),
+            ),
+          ],
+        ),
       ),
     );
   }
+
 
 
   void _transferAnimalToPaddock(int paddockId) async {

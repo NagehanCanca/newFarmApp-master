@@ -12,12 +12,12 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
       treatmentStatus:
           $enumDecode(_$TreatmentStatusEnumMap, json['treatmentStatus']),
       animalID: json['animalID'] as int,
-      animalEarringNumber: json['animalEarringNumber'] ?? '',
+      animalEarringNumber: json['animalEarringNumber'] as String,
       paddockName: json['paddockName'] as String,
       date: DateTime.parse(json['date'] as String),
       diseaseDiagnoseId: json['diseaseDiagnoseId'] as int,
-      diseaseDiagnoseDescription: json['diseaseDiagnoseDescription'] ?? '',
-      notes: json['notes'] ?? '',
+      diseaseDiagnoseDescription: json['diseaseDiagnoseDescription'] as String,
+      notes: json['notes'] as String,
       endUserId: json['endUserId'] as int?,
       endUserDescription: json['endUserDescription'] as String?,
       endDate: json['endDate'] == null
@@ -25,7 +25,7 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['endDate'] as String),
       treatmentEndType: $enumDecodeNullable(
           _$TreatmentEndTypeEnumMap, json['treatmentEndType']),
-      treatmentEndMessage: json['treatmentEndMessage'] ?? '',
+      treatmentEndMessage: json['treatmentEndMessage'] as String?,
       insertUser: json['insertUser'] as int,
       insertUserDescription: json['insertUserDescription'] as String,
       insertDate: json['insertDate'] == null

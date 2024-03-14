@@ -23,6 +23,11 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
   late TextEditingController _treatmentDateController;
   late TextEditingController _diagnosisController;
   late TextEditingController _descriptionController;
+  String? _selectedTreatmentStatus;
+  List<String> _treatmentStatusList = [
+    'Yeni Tedavi',
+    'Sonlanmış Tedavi',
+  ];
 
   @override
   void initState() {
@@ -55,17 +60,17 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
               ),
               const SizedBox(height: 10),
               _buildAnimalInfoFields(),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               const Text(
                 'Tedavi Bilgileri',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               _buildTreatmentFields(),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitTreatment,
-                child: Text('Tedaviyi Kaydet'),
+                child: const Text('Tedaviyi Kaydet'),
               ),
             ],
           ),
@@ -112,21 +117,31 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
     );
   }
 
-
   Widget _buildTreatmentFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _treatmentStatusController,
-          decoration: InputDecoration(labelText: 'Tedavi Durumu'),
+        DropdownButtonFormField<String>(
+          value: _selectedTreatmentStatus,
+          hint: const Text('Tedavi Durumu Seçiniz'),
+          items: _treatmentStatusList.map((String status) {
+            return DropdownMenuItem<String>(
+              value: status,
+              child: Text(status),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            setState(() {
+              _selectedTreatmentStatus = value!;
+            });
+          },
         ),
         GestureDetector(
           onTap: _selectDate,
           child: AbsorbPointer(
             child: TextField(
               controller: _treatmentDateController,
-              decoration: InputDecoration(labelText: 'Tarih'),
+              decoration: const InputDecoration(labelText: 'Tarih'),
             ),
           ),
         ),
@@ -135,13 +150,13 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
           child: AbsorbPointer(
             child: TextField(
               controller: _diagnosisController,
-              decoration: InputDecoration(labelText: 'Tanı'),
+              decoration: const InputDecoration(labelText: 'Tanı'),
             ),
           ),
         ),
         TextField(
           controller: _descriptionController,
-          decoration: InputDecoration(labelText: 'Not'),
+          decoration: const InputDecoration(labelText: 'Not'),
         ),
       ],
     );

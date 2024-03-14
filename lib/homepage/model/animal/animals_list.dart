@@ -27,7 +27,7 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Animals List'),
+        title: const Text('Hayvan Listesi'),
         actions: [
           IconButton(
             icon: Icon(Icons.check_box_outlined),
@@ -57,7 +57,7 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
       itemBuilder: (context, index) {
         final animal = animalList[index];
         return Card(
-          margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: InkWell(
             onTap: () {
               Navigator.push(
@@ -68,7 +68,7 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
               );
             },
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -84,19 +84,19 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
                       });
                     },
                   ),
-                  SizedBox(width: 16),
-                  Icon(Icons.pets, size: 48),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
+                  const Icon(Icons.pets, size: 48),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('RFID: ${animal.rfid}', style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 8),
-                        Text('Küpe No: ${animal.earringNumber}', style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 8),
+                        Text('RFID: ${animal.rfid}', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text('Küpe No: ${animal.earringNumber}', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
                         Text('Durum: ${animal.animalStatus.toString().split('.').last}', style: TextStyle(fontSize: 16)),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text('Giriş Tarihi: ${_formatDate(animal.farmInsertDate!)}', style: TextStyle(fontSize: 16)),
                       ],
                     ),

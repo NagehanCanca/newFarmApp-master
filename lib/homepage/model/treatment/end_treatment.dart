@@ -1,25 +1,38 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
+import '../../../model/treatment_model.dart';
 import '../../../service/base.service.dart';
 
 class EndTreatmentPage extends StatefulWidget {
+  final TreatmentModel treatmentModel;
+  EndTreatmentPage({required this.treatmentModel});
+
   @override
   _EndTreatmentPageState createState() => _EndTreatmentPageState();
 }
 
 class _EndTreatmentPageState extends State<EndTreatmentPage> {
-  late List<String> treatmentTypes = ['Cured', 'ToFollow', 'Ex'];
-  String selectedTreatmentType = 'Cured';
+  late List<String> treatmentTypes = ['Tedavi Edildi', 'Takibe Al', 'Öldü'];
+  String selectedTreatmentType = 'Tedavi Edildi';
+
+  String message = '';
 
   void _endTreatment() async {
     try {
-      Response response = await dio.post(
+      Response response = await dio.put(
         'Treatment/EndTreatment',
+        data: {
+          'endDate': DateTime.now().toString(),
+          'endUserId': widget.treatmentModel.endUserId,
+          'treatmentEndType': widget.treatmentModel.treatmentEndType.toString().split('.').last,
+          'treatmentEndMessage': widget.treatmentModel.treatmentEndMessage,
+        },
       );
-
       if (response.statusCode == HttpStatus.ok) {
+        setState(() {
+          message = 'Tedavi başarıyla sonlandırıldı';
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Tedavi başarıyla sonlandırıldı'),
@@ -32,6 +45,9 @@ class _EndTreatmentPageState extends State<EndTreatmentPage> {
       }
     } catch (e) {
       print('Hata: $e');
+      setState(() {
+        message = 'Tedavi sonlandırılırken bir hata oluştu';
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Tedavi sonlandırılırken bir hata oluştu'),
@@ -41,22 +57,20 @@ class _EndTreatmentPageState extends State<EndTreatmentPage> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('End Treatment'),
+        title: const Text('Tedavi Sonlandır'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Select Treatment Type:',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: selectedTreatmentType,
               items: treatmentTypes.map((type) {
@@ -70,11 +84,28 @@ class _EndTreatmentPageState extends State<EndTreatmentPage> {
                   selectedTreatmentType = value!;
                 });
               },
+              decoration: const InputDecoration(
+                labelText: 'Tedavi Sonucu',
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            TextField(
+              onChanged: (value) {
+                setState(() {
+                  message = value;
+                });
+              },
+              maxLines: 5,
+              decoration: const InputDecoration(
+                hintText: 'Açıklama...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _endTreatment,
-              child: Text('End Treatment'),
+              child: const Text('Kaydet'),
             ),
           ],
         ),

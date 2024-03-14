@@ -1,17 +1,21 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/homepage/model/treatment/treatment_details_table.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/treatment_model.dart';
+import '../../../model/treatment_note_model.dart';
+import '../../../model/treatment_product_model.dart';
 import '../../../service/base.service.dart';
 import 'end_treatment.dart';
 
 class EditTreatmentPage extends StatefulWidget {
+  final TreatmentNoteModel? treatmentNote;
+  final TreatmentProductModel? treatmentProduct;
   final AnimalModel animal;
   final TreatmentModel treatment;
 
-  const EditTreatmentPage({Key? key, required this.animal, required this.treatment}) : super(key: key);
+  const EditTreatmentPage({Key? key, required this.animal, required this.treatment, required this.treatmentNote, required this.treatmentProduct}) : super(key: key);
 
   @override
   _EditTreatmentPageState createState() => _EditTreatmentPageState();
@@ -29,7 +33,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     _selectedDate = widget.treatment.date;
     _diagnosisController = TextEditingController(text: widget.treatment.diseaseDiagnoseId.toString());
     _descriptionController = TextEditingController(text: widget.treatment.diseaseDiagnoseDescription);
-    _selectedDiagnosis = widget.treatment.diseaseDiagnoseId.toString();
+    _selectedDiagnosis = widget.treatment.diseaseDiagnoseDescription;
   }
 
   @override
@@ -37,6 +41,20 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tedavi Düzenle'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TreatmentDetailsTablePage(
+                  treatmentNote: widget.treatmentNote!,
+                  treatmentProduct: widget.treatmentProduct!,
+                )),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -65,7 +83,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EndTreatmentPage(),
+                        builder: (context) => EndTreatmentPage(treatmentModel: widget.treatment),
                       ),
                     );
                   },
@@ -87,10 +105,38 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Küpe No: ${widget.animal.earringNumber}'),
-        Text('Durumu: ${widget.animal.animalStatus.toString()}'),
-        Text('Çiftliğe Giriş Tarihi: ${widget.animal.farmInsertDate.toString().split(' ')[0]}'),
-        Text('Padok: ${widget.animal.paddockId}'),
+        TextField(
+          readOnly: true,
+          decoration: const InputDecoration(
+            labelText: 'Durumu',
+          ),
+          controller: TextEditingController(text: widget.animal.animalStatus.toString()),
+          enabled: false,
+        ),
+        TextField(
+          readOnly: true,
+          decoration: const InputDecoration(
+            labelText: 'Çiftliğe Giriş Tarihi',
+          ),
+          controller: TextEditingController(text: widget.animal.farmInsertDate.toString().split(' ')[0]),
+          enabled: false,
+        ),
+        TextField(
+          readOnly: true,
+          decoration: const InputDecoration(
+            labelText: 'Küpe No',
+          ),
+          controller: TextEditingController(text: widget.animal.earringNumber),
+          enabled: false,
+        ),
+        TextField(
+          readOnly: true,
+          decoration: const InputDecoration(
+            labelText: 'Padok',
+          ),
+          controller: TextEditingController(text: widget.animal.paddockDescription),
+          enabled: false,
+        ),
       ],
     );
   }
@@ -161,7 +207,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(_selectedDiagnosis ?? 'Tanı Seçilmedi'),
+                      Text(_selectedDiagnosis.toString() ?? 'Tanı Seçilmedi'),
                       const Icon(Icons.arrow_drop_down),
                     ],
                   ),
