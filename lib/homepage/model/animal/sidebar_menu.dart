@@ -1,6 +1,6 @@
 import 'package:farmsoftnew/homepage/model/animalReport/all_reports.dart';
+import 'package:farmsoftnew/homepage/model/weight/weight.dart';
 import 'package:flutter/material.dart';
-import 'package:farmsoftnew/screens/weighing/weighing_confirmation_page.dart';
 import '../transfer/transfer_operations.dart';
 import '../treatment/treatment.dart';
 import 'animal_search.dart';
@@ -105,7 +105,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TreatmentPage(selectedAnimals: [])),
+                MaterialPageRoute(builder: (context) => TreatmentPage(animal: [],)),
               );
             },
           ),
@@ -126,7 +126,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => WeighingConfirmationPage()),
+                MaterialPageRoute(builder: (context) => WeightListPage()),
               );
             },
           ),
@@ -166,7 +166,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => WeighingConfirmationPage()),
+                MaterialPageRoute(builder: (context) => NotificationListPage()),
               );
             },
           ),
@@ -208,7 +208,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => WeighingConfirmationPage()),
+                MaterialPageRoute(builder: (context) => NotificationListPage()),
               );
             },
           ),

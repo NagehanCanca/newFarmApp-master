@@ -1,60 +1,3 @@
-//             Padding(
-//               padding: const EdgeInsets.all(16),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     'Hayvan Türü: ${animal.animalTypeDescription ?? ''}',
-//                     style: const TextStyle(fontWeight: FontWeight.bold),
-//                   ),
-//                   const SizedBox(height: 12),
-//                   //Text('Bölüm Açıklaması: ${animal.sectionDescription ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Bölüm ID: ${animal.sectionId ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   Text('Küpe Numarası : ${animal.earringNumber.toString().split('.').last}'),
-//                   const SizedBox(height: 12),
-//                   Text('Giriş Tarihi: ${_formatDate(animal.farmInsertDate)}'),
-//                   const SizedBox(height: 12),
-//                   //Text('Cinsiyet: ${_formatGender(animal.animalGender)}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Doğum Tarihi: ${_formatDate(animal.birthDate)}'),
-//                   //const SizedBox(height: 12),
-//                   Text('Durum: ${animal.animalStatus.toString().split('.').last}'),
-//                   const SizedBox(height: 12),
-//                   //Text('Görsel: ${animal.image ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Hayvan Irkı ID: ${animal.animalRaceId ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Hayvan Türü Açıklaması: ${animal.animalTypeDescription ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Hayvan Türü ID: ${animal.animalTypeId ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('İzleme Kullanıcı: ${animal.trackingUser ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('İzleme Kullanıcı ID: ${animal.trackingUserId ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   Text('Menşeii : ${animal.origin ?? ''}'),
-//                   const SizedBox(height: 12),
-//                   Text('Padok : ${animal.paddockDescription ?? ''}'),
-//                   const SizedBox(height: 12),
-//                   //Text('Padok ID: ${animal.paddockId ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('RFID : ${animal.rfid ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Ölüm Tarihi: ${_formatDate(animal.exDate)}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Yapı Açıklaması: ${animal.buildDescription ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Yapı ID: ${animal.buildId ?? ''}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Bulaşıcı Hastalık : ${animal.isInfectious ?? false}'),
-//                   //const SizedBox(height: 12),
-//                   //Text('Takip Ediliyor : ${animal.isTracking ?? false}'),
-//                   //const SizedBox(height: 12),
-//
-//                   const SizedBox(height: 16),
-//
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -205,7 +148,7 @@ class _AnimalCardState extends State<AnimalCard>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Hayvan Türü: ${widget.animal.animalTypeId ?? ''}',
+                      'Hayvan Türü: ${widget.animal.animalTypeDescription.toString().split('.').last ?? ''}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
@@ -354,7 +297,6 @@ class _AnimalCardState extends State<AnimalCard>
             ),
           );
           setState(() {
-            // Güncellenmiş resmi ekranda göstermek için _image'i atadık
             _image = widget.animal.image ?? '';
           });
         } else {

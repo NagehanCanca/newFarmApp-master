@@ -15,7 +15,13 @@ class EditTreatmentPage extends StatefulWidget {
   final AnimalModel animal;
   final TreatmentModel treatment;
 
-  const EditTreatmentPage({Key? key, required this.animal, required this.treatment, required this.treatmentNote, required this.treatmentProduct}) : super(key: key);
+  const EditTreatmentPage(
+      {Key? key,
+      required this.animal,
+      required this.treatment,
+      required this.treatmentNote,
+      required this.treatmentProduct})
+      : super(key: key);
 
   @override
   _EditTreatmentPageState createState() => _EditTreatmentPageState();
@@ -31,8 +37,10 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   void initState() {
     super.initState();
     _selectedDate = widget.treatment.date;
-    _diagnosisController = TextEditingController(text: widget.treatment.diseaseDiagnoseId.toString());
-    _descriptionController = TextEditingController(text: widget.treatment.diseaseDiagnoseDescription);
+    _diagnosisController = TextEditingController(
+        text: widget.treatment.diseaseDiagnoseId.toString());
+    _descriptionController = TextEditingController(
+        text: widget.treatment.diseaseDiagnoseDescription);
     _selectedDiagnosis = widget.treatment.diseaseDiagnoseDescription;
   }
 
@@ -47,10 +55,11 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TreatmentDetailsTablePage(
-                  treatmentNote: widget.treatmentNote!,
-                  treatmentProduct: widget.treatmentProduct!,
-                )),
+                MaterialPageRoute(
+                    builder: (context) => TreatmentDetailsTablePage(
+                          treatmentNote: widget.treatmentNote!,
+                          treatmentProduct: widget.treatmentProduct!,
+                        )),
               );
             },
           ),
@@ -58,44 +67,71 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Hayvan Bilgileri',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildAnimalInfoFields(),
-            const SizedBox(height: 20),
-            const Text(
-              'Tedavi Bilgileri',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildTreatmentFields(),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EndTreatmentPage(treatmentModel: widget.treatment),
-                      ),
-                    );
-                  },
-                  child: Text('Tedaviyi Sonlandır'),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hayvan Bilgileri',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                ElevatedButton(
-                  onPressed: _saveTreatment,
-                  child: Text('Kaydet'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildAnimalInfoFields(),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Tedavi Bilgileri',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTreatmentFields(),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EndTreatmentPage(
+                                    treatmentModel: widget.treatment),
+                              ),
+                            );
+                          },
+                          child: Text('Tedaviyi Sonlandır'),
+                        ),
+                        ElevatedButton(
+                          onPressed: _saveTreatment,
+                          child: Text('Kaydet'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -110,7 +146,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Durumu',
           ),
-          controller: TextEditingController(text: widget.animal.animalStatus.toString()),
+          controller: TextEditingController(text: widget.animal.animalStatus.toString() ?? ''),
           enabled: false,
         ),
         TextField(
@@ -118,7 +154,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Çiftliğe Giriş Tarihi',
           ),
-          controller: TextEditingController(text: widget.animal.farmInsertDate.toString().split(' ')[0]),
+          controller: TextEditingController(text: widget.animal.farmInsertDate?.toString().split(' ')[0] ?? ''),
           enabled: false,
         ),
         TextField(
@@ -126,7 +162,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Küpe No',
           ),
-          controller: TextEditingController(text: widget.animal.earringNumber),
+          controller: TextEditingController(text: widget.animal.earringNumber ?? ''),
           enabled: false,
         ),
         TextField(
@@ -134,12 +170,13 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Padok',
           ),
-          controller: TextEditingController(text: widget.animal.paddockDescription),
+          controller: TextEditingController(text: widget.animal.paddockDescription ?? ''),
           enabled: false,
         ),
       ],
     );
   }
+
 
   void _showDiagnosesBottomSheet(List<String> diagnoses) {
     showModalBottomSheet(
@@ -225,8 +262,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     );
   }
 
-
-
   void _pickDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -243,11 +278,13 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   Future<List<String>> _fetchDiagnoses() async {
     try {
-      Response response = await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
+      Response response =
+          await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
-        List<String> diagnoses = responseData.map((item) => item['name'].toString()).toList();
+        List<String> diagnoses =
+            responseData.map((item) => item['name'].toString()).toList();
         return diagnoses;
       } else {
         throw Exception('HTTP Hatası ${response.statusCode}');

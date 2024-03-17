@@ -29,7 +29,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   final int updateUserId = 1;
   late int _selectedTypeId;
   late int _selectedRaceId;
-  AnimalTypeModel? _selectedType; // _selectedType değişkeni null olarak tanımlandı
+  AnimalTypeModel? _selectedType;
   AnimalRaceModel? _selectedRace;
 
   @override
@@ -180,7 +180,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
     String initialType = _selectedType != null ? _selectedType!.description ?? '' : ''; // Önceden seçilen türü alın
 
     return ListTile(
-      title: Text('$initialType'), // Önceden seçilen türü göster
+      title: Text('$initialType'),
       onTap: () {
         showModalBottomSheet(
           context: context,

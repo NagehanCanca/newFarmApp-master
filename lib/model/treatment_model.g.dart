@@ -10,14 +10,14 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
     TreatmentModel(
       id: json['id'] as int,
       treatmentStatus:
-          $enumDecode(_$TreatmentStatusEnumMap, json['treatmentStatus']),
+      $enumDecode(_$TreatmentStatusEnumMap, json['treatmentStatus']),
       animalID: json['animalID'] as int,
-      animalEarringNumber: json['animalEarringNumber'] as String,
-      paddockName: json['paddockName'] as String,
+      animalEarringNumber: json['animalEarringNumber'] as String?,
+      paddockName: json['paddockName'] as String?,
       date: DateTime.parse(json['date'] as String),
       diseaseDiagnoseId: json['diseaseDiagnoseId'] as int,
-      diseaseDiagnoseDescription: json['diseaseDiagnoseDescription'] as String,
-      notes: json['notes'] as String,
+      diseaseDiagnoseDescription: json['diseaseDiagnoseDescription'] as String?,
+      notes: json['notes'] as String?,
       endUserId: json['endUserId'] as int?,
       endUserDescription: json['endUserDescription'] as String?,
       endDate: json['endDate'] == null
@@ -27,12 +27,7 @@ TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
           _$TreatmentEndTypeEnumMap, json['treatmentEndType']),
       treatmentEndMessage: json['treatmentEndMessage'] as String?,
       insertUser: json['insertUser'] as int,
-      insertUserDescription: json['insertUserDescription'] as String,
-      insertDate: json['insertDate'] == null
-          ? null
-          : DateTime.parse(json['insertDate'] as String),
-      updateUser: json['updateUser'] as int?,
-      updateUserDescription: json['updateUserDescription'] as String?,
+      insertUserDescription: json['insertUserDescription'] as String?,
       updateDate: json['updateDate'] == null
           ? null
           : DateTime.parse(json['updateDate'] as String),
@@ -43,8 +38,8 @@ Map<String, dynamic> _$TreatmentModelToJson(TreatmentModel instance) =>
       'id': instance.id,
       'treatmentStatus': _$TreatmentStatusEnumMap[instance.treatmentStatus]!,
       'animalID': instance.animalID,
-      'animalEarringNumber': instance.animalEarringNumber,
-      'paddockName': instance.paddockName,
+          'animalEarringNumber': instance.animalEarringNumber ?? "",
+          'paddockName': instance.paddockName ?? "",
       'date': instance.date.toIso8601String(),
       'diseaseDiagnoseId': instance.diseaseDiagnoseId,
       'diseaseDiagnoseDescription': instance.diseaseDiagnoseDescription,
@@ -53,12 +48,12 @@ Map<String, dynamic> _$TreatmentModelToJson(TreatmentModel instance) =>
       'endUserDescription': instance.endUserDescription,
       'endDate': instance.endDate?.toIso8601String(),
       'treatmentEndType': _$TreatmentEndTypeEnumMap[instance.treatmentEndType],
-      'treatmentEndMessage': instance.treatmentEndMessage,
+          'treatmentEndMessage': instance.treatmentEndMessage ?? "",
       'insertUser': instance.insertUser,
-      'insertUserDescription': instance.insertUserDescription,
+      'insertUserDescription': instance.insertUserDescription ?? "",
       'insertDate': instance.insertDate?.toIso8601String(),
       'updateUser': instance.updateUser,
-      'updateUserDescription': instance.updateUserDescription,
+      'updateUserDescription': instance.updateUserDescription ?? "",
       'updateDate': instance.updateDate?.toIso8601String(),
     };
 

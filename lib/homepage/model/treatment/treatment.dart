@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:farmsoftnew/homepage/model/animal/animal_test.dart';
 import 'package:farmsoftnew/homepage/model/treatment/edit_treatment.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
@@ -10,11 +9,16 @@ import '../../../model/treatment_product_model.dart';
 import '../../../service/base.service.dart';
 
 class TreatmentPage extends StatefulWidget {
-  final List<AnimalModel> selectedAnimals;
+  final List<AnimalModel> animal;
   final TreatmentNoteModel? treatmentNote;
   final TreatmentProductModel? treatmentProduct;
 
-  const TreatmentPage({Key? key, required this.selectedAnimals, this.treatmentNote, this.treatmentProduct}) : super(key: key);
+  const TreatmentPage({
+    Key? key,
+    this.treatmentNote,
+    this.treatmentProduct,
+    required this.animal,
+  }) : super(key: key);
 
   @override
   _TreatmentPageState createState() => _TreatmentPageState();
@@ -22,13 +26,13 @@ class TreatmentPage extends StatefulWidget {
 
 class _TreatmentPageState extends State<TreatmentPage> {
   late List<TreatmentModel> _treatments = [];
-  List<AnimalModel> selectedAnimals = [];
+  List<AnimalModel> animal = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchTreatmentsForSelectedAnimals();
+    _fetchTreatmentsForAnimal();
   }
 
   @override
@@ -42,77 +46,74 @@ class _TreatmentPageState extends State<TreatmentPage> {
   }
 
   Widget _buildTreatmentTable() {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: _treatments.length,
-        itemBuilder: (context, index) {
-          final treatment = _treatments[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: InkWell(
-              // onTap: () {
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //       builder: (context) => AnimalCard(animal: widget.animal),
-              //     ),
-              //   );
-              // },
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Küpe No: ${treatment.animalEarringNumber ?? ""}',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            _editTreatment(treatment);
-                          },
-                        ),
-                      ],
+    return FutureBuilder<void>(
+      future: _fetchTreatmentsForAnimal(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return Container(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _treatments.length,
+              itemBuilder: (context, index) {
+                final treatment = _treatments[index];
+                final animals = animal[index];
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  child: InkWell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Küpe No: ${widget.animal[0].earringNumber ?? ""}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  _editTreatment(treatment, animals);
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Tedavi Durumu: ${treatment.treatmentStatus.toString().split('.').last ?? ""}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Açıklama: ${treatment.diseaseDiagnoseDescription ?? ""}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    // Text('Tarih: ${_formatDate(treatment.date)}', style: const TextStyle(fontSize: 16)),
-                    // const SizedBox(height: 8),
-                    Text('Tedavi Durumu: ${treatment.treatmentStatus.toString().split('.').last ?? ""}', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 8),
-                    // Text('Padok Adı: ${treatment.paddockName ?? ""}', style: const TextStyle(fontSize: 16)),
-                    // const SizedBox(height: 8),
-                    // Text('Tanı: ${treatment.diseaseDiagnoseId ?? ""}', style: const TextStyle(fontSize: 16)),
-                    // const SizedBox(height: 8),
-                    Text('Açıklama: ${treatment.diseaseDiagnoseDescription ?? ""}', style: const TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           );
-        },
-      ),
+        }
+      },
     );
   }
 
-  String _formatDate(DateTime? date) {
-    if (date != null) {
-      return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
-    } else {
-      return '';
-    }
-  }
 
-  Future<void> _fetchTreatmentsForSelectedAnimals() async {
+
+  Future<void> _fetchTreatmentsForAnimal() async {
     try {
-      Response response = await dio.get(
-          "Treatment/GetAllTreatmentAnimals"
-      );
+      Response response = await dio.get("Treatment/GetAllTreatmentAnimals");
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
         setState(() {
@@ -120,6 +121,12 @@ class _TreatmentPageState extends State<TreatmentPage> {
               .map((json) => TreatmentModel.fromJson(json))
               .toList();
           _isLoading = false;
+          animal = _treatments.map((treatment) {
+            return widget.animal.firstWhere(
+                  (animal) => animal.id == treatment.animalID,
+              orElse: () => AnimalModel(),
+            );
+          }).toList();
         });
       } else {
         throw Exception('HTTP Hatası: ${response.statusCode}');
@@ -134,16 +141,19 @@ class _TreatmentPageState extends State<TreatmentPage> {
     }
   }
 
-  void _editTreatment(TreatmentModel treatment) {
+
+  void _editTreatment(TreatmentModel treatment, AnimalModel animal) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        //builder: (context) => EditTreatmentPage(
-        builder: (context) => AnimalTestScreen(
-          // animal: AnimalModel(),
-          // treatment: treatment,
+        builder: (context) => EditTreatmentPage(
+          animal: animal,
+          treatment: treatment,
+          treatmentNote: widget.treatmentNote,
+          treatmentProduct: widget.treatmentProduct,
         ),
       ),
     );
+    _fetchTreatmentsForAnimal();
   }
 }
