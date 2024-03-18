@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:farmsoftnew/homepage/model/animal/animal_test.dart';
 import 'package:farmsoftnew/homepage/model/animal/sidebar_menu.dart';
+import 'package:farmsoftnew/homepage/model/treatment/treatment_details_table.dart';
 import 'package:farmsoftnew/screens/navigationhome/navigation_home_screen.dart';
 import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:farmsoftnew/theme/app_theme.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
       ),
      home: LoginScreen(),
       //home: AnimalTestScreen(),
-      //home: SideBarMenu(),
+      //home: TreatmentDetailsTablePage(),
     );
   }
 }

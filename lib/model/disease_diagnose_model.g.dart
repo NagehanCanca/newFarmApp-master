@@ -13,11 +13,11 @@ DiseaseDiagnoseModel _$DiseaseDiagnoseModelFromJson(
       code: json['code'] as String,
       name: json['name'] as String,
       isInfectious: json['isInfectious'] as bool,
-      insertUser: json['insertUser'] as String,
+      insertUser: json['insertUser'] as int,
       insertDate: json['insertDate'] == null
           ? null
           : DateTime.parse(json['insertDate'] as String),
-      updateUser: json['updateUser'] as String,
+      updateUser: json['updateUser'] as int?,
       updateDate: json['updateDate'] == null
           ? null
           : DateTime.parse(json['updateDate'] as String),

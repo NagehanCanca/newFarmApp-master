@@ -8,9 +8,9 @@ class DiseaseDiagnoseModel {
   String code;
   String name;
   bool isInfectious;
-  String insertUser;
+  int insertUser;
   DateTime? insertDate;
-  String updateUser;
+  int? updateUser;
   DateTime? updateDate;
 
   DiseaseDiagnoseModel({
@@ -20,7 +20,7 @@ class DiseaseDiagnoseModel {
     required this.isInfectious,
     required this.insertUser,
     this.insertDate,
-    required this.updateUser,
+    this.updateUser,
     this.updateDate,
   });
 

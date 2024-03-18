@@ -9,7 +9,6 @@ import '../../../model/treatment_product_model.dart';
 import '../../../service/base.service.dart';
 
 class TreatmentPage extends StatefulWidget {
-  final List<AnimalModel> animal;
   final TreatmentNoteModel? treatmentNote;
   final TreatmentProductModel? treatmentProduct;
 
@@ -17,7 +16,6 @@ class TreatmentPage extends StatefulWidget {
     Key? key,
     this.treatmentNote,
     this.treatmentProduct,
-    required this.animal,
   }) : super(key: key);
 
   @override
@@ -26,13 +24,12 @@ class TreatmentPage extends StatefulWidget {
 
 class _TreatmentPageState extends State<TreatmentPage> {
   late List<TreatmentModel> _treatments = [];
-  List<AnimalModel> animal = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchTreatmentsForAnimal();
+
   }
 
   @override
@@ -47,7 +44,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
 
   Widget _buildTreatmentTable() {
     return FutureBuilder<void>(
-      future: _fetchTreatmentsForAnimal(),
+      future:  _fetchTreatmentsForAnimal(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -61,7 +58,6 @@ class _TreatmentPageState extends State<TreatmentPage> {
               itemCount: _treatments.length,
               itemBuilder: (context, index) {
                 final treatment = _treatments[index];
-                final animals = animal[index];
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -75,13 +71,13 @@ class _TreatmentPageState extends State<TreatmentPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Küpe No: ${widget.animal[0].earringNumber ?? ""}',
+                                'Küpe No: ${treatment.animalEarringNumber ?? ""}',
                                 style: const TextStyle(fontSize: 16),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.edit),
                                 onPressed: () {
-                                  _editTreatment(treatment, animals);
+                                  _editTreatment(treatment);
                                 },
                               ),
                             ],
@@ -116,18 +112,11 @@ class _TreatmentPageState extends State<TreatmentPage> {
       Response response = await dio.get("Treatment/GetAllTreatmentAnimals");
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
-        setState(() {
+
           _treatments = responseData
               .map((json) => TreatmentModel.fromJson(json))
               .toList();
           _isLoading = false;
-          animal = _treatments.map((treatment) {
-            return widget.animal.firstWhere(
-                  (animal) => animal.id == treatment.animalID,
-              orElse: () => AnimalModel(),
-            );
-          }).toList();
-        });
       } else {
         throw Exception('HTTP Hatası: ${response.statusCode}');
       }
@@ -142,12 +131,12 @@ class _TreatmentPageState extends State<TreatmentPage> {
   }
 
 
-  void _editTreatment(TreatmentModel treatment, AnimalModel animal) {
+  void _editTreatment(TreatmentModel treatment) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditTreatmentPage(
-          animal: animal,
+
           treatment: treatment,
           treatmentNote: widget.treatmentNote,
           treatmentProduct: widget.treatmentProduct,
