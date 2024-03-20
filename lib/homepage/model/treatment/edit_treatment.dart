@@ -1,25 +1,21 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:farmsoftnew/homepage/model/treatment/treatment_details_table.dart';
+import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:farmsoftnew/model/disease_diagnose_model.dart';
+import 'package:farmsoftnew/model/product_unit_model.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/treatment_model.dart';
 import '../../../model/treatment_note_model.dart';
 import '../../../model/treatment_product_model.dart';
 import '../../../service/base.service.dart';
-import 'end_treatment.dart';
 
 class EditTreatmentPage extends StatefulWidget {
-  final TreatmentNoteModel? treatmentNote;
-  late final TreatmentProductModel? treatmentProduct;
   final TreatmentModel treatment;
 
-  EditTreatmentPage({
+  const EditTreatmentPage({
     Key? key,
     required this.treatment,
-    required this.treatmentNote,
-    required this.treatmentProduct,
   }) : super(key: key);
 
   @override
@@ -35,9 +31,13 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   late List<DiseaseDiagnoseModel> _diagnoses;
   late TextEditingController _noteController;
   late TextEditingController _productController;
-  late TreatmentProductModel treatmentModel;
+  late ProductUnitModel unitModel;
   late int _treatmentId;
   late int _noteId;
+  late TreatmentProductModel? treatmentProduct = null;
+  late int _animalId;
+  late double _quantity;
+  late int _unitId;
 
   @override
   void initState() {
@@ -48,34 +48,20 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
         text: widget.treatment.diseaseDiagnoseId.toString());
     _descriptionController = TextEditingController(
         text: widget.treatment.notes);
-    _selectedDiagnosis = widget.treatment.diseaseDiagnoseId;
+    _selectedDiagnosis = widget.treatment.diseaseDiagnoseId ?? 0;
     _noteController = TextEditingController();
     _productController = TextEditingController();
-    _treatmentId = widget.treatment.id;
-    _noteId = widget.treatmentNote!.id;
+    _treatmentId = widget.treatment.id ?? 0;
+    _animalId = widget.treatment.animalID ?? 0;
+    _quantity = treatmentProduct?.quantity ?? 0;
+    _unitId = treatmentProduct?.unitId ?? 0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tedavi Düzenle'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TreatmentDetailsTablePage(
-                    // treatmentNote: widget.treatmentNote!,
-                    // treatmentProduct: widget.treatmentProduct!,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+        title: const Text('Tedavi Düzenle'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -83,13 +69,13 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Hayvan Bilgileri',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(12),
@@ -108,7 +94,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
               ),
               const SizedBox(height: 8),
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(12),
@@ -119,10 +105,10 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                     _buildTreatmentFields(),
                     const SizedBox(height: 20),
                     FutureBuilder<List<TreatmentProductModel>>(
-                      future: _fetchMedications(),
+                      future: _fetchMedications(_treatmentId),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Hata: ${snapshot.error}');
                         } else {
@@ -131,7 +117,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               DropdownButtonFormField<TreatmentProductModel>(
-                                value: widget.treatmentProduct,
+                                value: treatmentProduct,
                                 items: medications.map((medication) {
                                   return DropdownMenuItem<TreatmentProductModel>(
                                     value: medication,
@@ -140,19 +126,19 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                                 }).toList(),
                                 onChanged: (value) {
                                   setState(() {
-                                    widget.treatmentProduct = value;
+                                    treatmentProduct = value;
                                   });
                                 },
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   labelText: 'İlaç',
                                   border: OutlineInputBorder(),
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              if (widget.treatmentProduct != null &&
-                                  widget.treatmentProduct!.unitId != null)
+                              if (treatmentProduct != null &&
+                                  treatmentProduct!.unitId != null)
                                 DropdownButtonFormField<int>(
-                                  value: widget.treatmentProduct!.unitId, // Assuming unitId is an int
+                                  value: treatmentProduct!.unitId, // Assuming unitId is an int
                                   items: const [
                                     DropdownMenuItem<int>(
                                       value: 1, // Örnek bir birim değeri
@@ -167,53 +153,63 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                                   onChanged: (value) {
                                     setState(() {
                                       // Update the selected unit
-                                      widget.treatmentProduct!.unitId = value!;
+                                      treatmentProduct!.unitId = value!;
                                     });
                                   },
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: 'Birim',
                                     border: OutlineInputBorder(),
                                   ),
                                 ),
                               const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: _addMedication,
-                                child: Text('İlaç Ekle'),
-                              ),
-                              ElevatedButton(
-                                onPressed: _deleteMedication,
-                                child: Text('İlaç Sil'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.red,
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Butonları eşit aralıklarla yerleştirir
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: _addMedication,
+                                    child: const Text('Ekle'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: _deleteMedication,
+                                    child: const Text('Sil'),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Colors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
                               TextField(
-                                controller: _descriptionController,
-                                decoration: InputDecoration(labelText: 'Not'),
+                                controller: _noteController,
+                                decoration: const InputDecoration(labelText: 'Not'),
                               ),
                               const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: _addNote,
-                                child: Text('Ekle'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Butonları eşit aralıklarla yerleştirir
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: _addNote,
+                                    child: const Text('Ekle'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: _deleteNote,
+                                    child: const Text('Sil'),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Colors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              ElevatedButton(
-                                onPressed: _deleteNote,
-                                child: Text('Sil'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.red,
-                                ),
-                              ),
-                              SizedBox(height: 20), // Aradaki mesafeyi ayarlayan SizedBox
+                              const SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Expanded(
                                     child: ElevatedButton(
                                       onPressed: _endTreatment,
-                                      child: Text('Tedaviyi Sonlandır'),
+                                      child: const Text('Tedaviyi Sonlandır'),
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.orange,
-                                        minimumSize: Size(double.infinity, 40), // Genişlik ve yükseklik ayarları
+                                        minimumSize: const Size(double.infinity, 40), // Genişlik ve yükseklik ayarları
                                       ),
                                     ),
                                   ),
@@ -233,17 +229,18 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ),
     );
   }
+
   void _addMedication() async {
     try {
-      var data = {
-        'animalId': selectedAnimal.id,
-        'productId': widget.treatmentProduct!.id,
-        // Diğer gerekli verileri ekle
-      };
-
+      treatmentProduct?.treatmentId = _treatmentId;
+      treatmentProduct?.unitId = _unitId;
+      treatmentProduct?.animalId = _animalId;
+      treatmentProduct?.insertUser = cachemanager.getItem(0)!.id!;
+      treatmentProduct?.quantity = _quantity;
       Response response = await dio.post(
-        'Treatment/AddMedication',
-        data: data,
+        'TreatmentProduct/AddTreatmentProduct',
+          data: treatmentProduct!.toJson(),
+
       );
 
       if (response.statusCode == HttpStatus.ok) {
@@ -270,27 +267,30 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   void _deleteMedication() async {
     try {
-      var data = {
-        'animalId': selectedAnimal.id,
-        'productId': widget.treatmentProduct!.id,
-        // Diğer gerekli verileri ekle
-      };
+      if (treatmentProduct != null) {
+        int? productId = treatmentProduct!.id;
 
-      Response response = await dio.post(
-        'Treatment/DeleteMedication',
-        data: data,
-      );
+        if (productId != null) {
+          Response response = await dio.delete(
+            'TreatmentNote/DeleteTreatmentNote',
+            queryParameters: {'id': productId},
+          );
 
-      if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('İlaç başarıyla silindi'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // İlaç silindikten sonra ilaç listesini yenilemek için gerekli kodu buraya ekle
+          if (response.statusCode == HttpStatus.ok) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('İlaç başarıyla silindi'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            throw Exception('HTTP Hatası ${response.statusCode}');
+          }
+        } else {
+          throw Exception('İlaç id boş olamaz');
+        }
       } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
+        throw Exception('TreatmentProduct boş olamaz');
       }
     } catch (e) {
       print('Hata: $e');
@@ -303,9 +303,12 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
-  Future<List<TreatmentProductModel>> _fetchMedications() async {
+
+  Future<List<TreatmentProductModel>> _fetchMedications(int treatmentId) async {
     try {
-      Response response = await dio.get('Medication/GetAllMedications');
+      Response response = await dio.get(
+        'ProductUnit/GetAllProductUnits',
+      );
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
@@ -324,13 +327,11 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   void _addNote() async {
     try {
-        widget.treatment.id = _treatmentId;
-        _noteController.text = _noteController as String;
 
       Response response = await dio.post(
-        'Treatment/AddNote',
-        data: widget.treatmentNote?.toJson(),
-      );
+        'TreatmentNote/AddTreatmentNote',
+        data: TreatmentNoteModel(treatmentId: widget.treatment.id, date: DateTime.now(),
+            notes: _noteController.text, insertUser: cachemanager.getItem(0)!.id!));
 
       if (response.statusCode == HttpStatus.ok) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -354,14 +355,13 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
+
+
   void _deleteNote() async {
     try {
-        widget.treatment.id = _treatmentId;
-        widget.treatmentNote!.id = _noteId;
-
-      Response response = await dio.post(
-        'Treatment/DeleteNote',
-        data: widget.treatmentNote?.toJson(),
+      Response response = await dio.delete(
+        'TreatmentNote/DeleteTreatmentNote',
+        queryParameters: {'id': _noteId},
       );
 
       if (response.statusCode == HttpStatus.ok) {
@@ -385,7 +385,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       );
     }
   }
-
 
 
   Widget _buildAnimalInfoFields() {
@@ -432,7 +431,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ],
     );
   }
-
 
   void _showDiagnosesBottomSheet(List<String> diagnoses) {
     showModalBottomSheet(
@@ -487,7 +485,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           future: _fetchDiagnoses(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return Text('Hata: ${snapshot.error}');
             } else {
@@ -521,19 +519,19 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
         const SizedBox(height: 12),
         TextField(
           controller: _descriptionController,
-          decoration: InputDecoration(labelText: 'Not'),
+          decoration: const InputDecoration(labelText: 'Not'),
         ),
         const SizedBox(height: 12),
-        SizedBox(height: 20), // Aradaki mesafeyi ayarlayan SizedBox
+        const SizedBox(height: 20), // Aradaki mesafeyi ayarlayan SizedBox
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
               child: ElevatedButton(
                 onPressed: _saveTreatment,
-                child: Text('Kaydet'),
+                child: const Text('Kaydet'),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 40), // Genişlik ve yükseklik ayarları
+                  minimumSize: const Size(double.infinity, 40), // Genişlik ve yükseklik ayarları
                 ),
               ),
             ),
@@ -542,6 +540,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ],
     );
   }
+
 
   void _pickDate() async {
     final DateTime? pickedDate = await showDatePicker(

@@ -8,17 +8,17 @@ part of 'treatment_note_model.dart';
 
 TreatmentNoteModel _$TreatmentNoteModelFromJson(Map<String, dynamic> json) =>
     TreatmentNoteModel(
-      id: json['id'] as int,
+      id: json['id'] as int?,
       treatmentId: json['treatmentId'] as int,
       date: DateTime.parse(json['date'] as String),
       notes: json['notes'] as String,
       insertUser: json['insertUser'] as int,
-      insertUserDescription: json['insertUserDescription'] as String,
+      insertUserDescription: json['insertUserDescription'] as String?,
       insertDate: json['insertDate'] == null
           ? null
           : DateTime.parse(json['insertDate'] as String),
-      updateUser: json['updateUser'] as int,
-      updateUserDescription: json['updateUserDescription'] as String,
+      updateUser: json['updateUser'] as int?,
+      updateUserDescription: json['updateUserDescription'] as String?,
       updateDate: json['updateDate'] == null
           ? null
           : DateTime.parse(json['updateDate'] as String),

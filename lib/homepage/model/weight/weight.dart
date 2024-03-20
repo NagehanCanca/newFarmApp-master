@@ -23,7 +23,9 @@ class _WeightListPageState extends State<WeightListPage> {
 
   Future<void> fetchWeights() async {
     try {
-      Response response = await dio.get("api/Weight/GetAllWeights");
+      Response response = await dio.get(
+          'Weight/GetAllWeights'
+      );
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
         setState(() {

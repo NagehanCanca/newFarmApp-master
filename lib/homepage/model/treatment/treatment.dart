@@ -10,12 +10,10 @@ import '../../../service/base.service.dart';
 
 class TreatmentPage extends StatefulWidget {
   final TreatmentNoteModel? treatmentNote;
-  final TreatmentProductModel? treatmentProduct;
 
   const TreatmentPage({
     Key? key,
     this.treatmentNote,
-    this.treatmentProduct,
   }) : super(key: key);
 
   @override
@@ -130,7 +128,6 @@ class _TreatmentPageState extends State<TreatmentPage> {
     }
   }
 
-
   void _editTreatment(TreatmentModel treatment) {
     Navigator.push(
       context,
@@ -138,8 +135,6 @@ class _TreatmentPageState extends State<TreatmentPage> {
         builder: (context) => EditTreatmentPage(
 
           treatment: treatment,
-          treatmentNote: widget.treatmentNote,
-          treatmentProduct: widget.treatmentProduct,
         ),
       ),
     );

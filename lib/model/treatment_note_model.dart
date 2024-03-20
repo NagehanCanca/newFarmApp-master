@@ -4,27 +4,27 @@ part 'treatment_note_model.g.dart';
 
 @JsonSerializable()
 class TreatmentNoteModel {
-  int id;
+  int? id;
   int treatmentId;
   DateTime date;
   String notes;
   int insertUser;
-  String insertUserDescription;
+  String? insertUserDescription;
   DateTime? insertDate;
-  int updateUser;
-  String updateUserDescription;
+  int? updateUser;
+  String? updateUserDescription;
   DateTime? updateDate;
 
   TreatmentNoteModel({
-    required this.id,
+    this.id,
     required this.treatmentId,
     required this.date,
     required this.notes,
     required this.insertUser,
-    required this.insertUserDescription,
+    this.insertUserDescription,
     this.insertDate,
-    required this.updateUser,
-    required this.updateUserDescription,
+    this.updateUser,
+    this.updateUserDescription,
     this.updateDate,
   });
 
