@@ -434,7 +434,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
-
   Widget _buildAnimalInfoFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

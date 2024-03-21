@@ -52,80 +52,92 @@ class _TransferPageState extends State<TransferPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DropdownButtonFormField<BuildingModel>(
-              value: selectedBuilding,
-              hint: const Text('Bina Seçiniz'),
-              items: buildings
-                  .map((building) => DropdownMenuItem(
-                value: building,
-                child: Text(building.description ?? ''),
-              ))
-                  .toList(),
-              onChanged: (building) {
-                setState(() {
-                  selectedBuilding = building;
-                  selectedSection = null;
-                  selectedPaddock = null;
-                  sections.clear();
-                  paddocks.clear();
-                  if (building != null) {
-                    _fetchSections(building.id!);
-                  }
-                });
-              },
-            ),
-            SizedBox(height: 16),
-            DropdownButtonFormField<SectionModel>(
-              value: selectedSection,
-              hint: const Text('Bölüm Seçiniz'),
-              items: sections
-                  .map((section) => DropdownMenuItem(
-                value: section,
-                child: Text(section.description ?? ''),
-              ))
-                  .toList(),
-              onChanged: (section) {
-                setState(() {
-                  selectedSection = section;
-                  selectedPaddock = null;
-                  paddocks.clear();
-                  if (section != null) {
-                    _fetchPaddocks(section.id!);
-                  }
-                });
-              },
-            ),
-            SizedBox(height: 16),
-            DropdownButtonFormField<PaddockModel>(
-              value: selectedPaddock,
-              hint: const Text('Paddock Seçiniz'),
-              items: paddocks
-                  .map((paddock) => DropdownMenuItem(
-                value: paddock,
-                child: Text(paddock.description ?? ''),
-              ))
-                  .toList(),
-              onChanged: (paddock) {
-                setState(() {
-                  selectedPaddock = paddock;
-                });
-              },
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedPaddock != null) {
-                  _transferAnimalToPaddock(selectedPaddock!.id!);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lütfen bir paddock seçiniz.'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Transfer Et'),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<BuildingModel>(
+                    value: selectedBuilding,
+                    hint: const Text('Bina Seçiniz'),
+                    items: buildings
+                        .map((building) => DropdownMenuItem(
+                      value: building,
+                      child: Text(building.description ?? ''),
+                    ))
+                        .toList(),
+                    onChanged: (building) {
+                      setState(() {
+                        selectedBuilding = building;
+                        selectedSection = null;
+                        selectedPaddock = null;
+                        sections.clear();
+                        paddocks.clear();
+                        if (building != null) {
+                          _fetchSections(building.id!);
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<SectionModel>(
+                    value: selectedSection,
+                    hint: const Text('Bölüm Seçiniz'),
+                    items: sections
+                        .map((section) => DropdownMenuItem(
+                      value: section,
+                      child: Text(section.description ?? ''),
+                    ))
+                        .toList(),
+                    onChanged: (section) {
+                      setState(() {
+                        selectedSection = section;
+                        selectedPaddock = null;
+                        paddocks.clear();
+                        if (section != null) {
+                          _fetchPaddocks(section.id!);
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<PaddockModel>(
+                    value: selectedPaddock,
+                    hint: const Text('Padok Seçiniz'),
+                    items: paddocks
+                        .map((paddock) => DropdownMenuItem(
+                      value: paddock,
+                      child: Text(paddock.description ?? ''),
+                    ))
+                        .toList(),
+                    onChanged: (paddock) {
+                      setState(() {
+                        selectedPaddock = paddock;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (selectedPaddock != null) {
+                        _transferAnimalToPaddock(selectedPaddock!.id!);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Lütfen bir paddock seçiniz.'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Transfer Et'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

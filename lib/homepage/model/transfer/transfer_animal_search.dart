@@ -39,112 +39,131 @@ class _TransferAnimalSearchWidgetState extends State<TransferAnimalSearchWidget>
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: searchController,
-              decoration: const InputDecoration(
-                hintText: 'RFID Giriniz',
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  hintText: 'RFID Giriniz',
+                  labelText: 'RFID',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _searchAnimal,
-              child: const Text('Hayvan Ara'),
-            ),
-            const SizedBox(height: 16),
-            if (selectedAnimal != null) ...[
-              const SizedBox(height: 32),
-              ListTile(
-                title: Text(selectedAnimal!.animalTypeDescription ?? ''),
-                subtitle: Text(selectedAnimal!.buildDescription ?? ''),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _searchAnimal,
+                child: const Text('Hayvan Ara'),
               ),
+              const SizedBox(height: 16),
+              if (selectedAnimal != null) ...[
+                // ListTile(
+                //   title: Text(selectedAnimal!.animalTypeDescription ?? ''),
+                //   subtitle: Text(selectedAnimal!.buildDescription ?? ''),
+                // ),
+                const SizedBox(height: 32),
+              ],
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<BuildingModel>(
+                      value: selectedBuilding,
+                      hint: const Text('Bina Seçiniz'),
+                      items: buildings
+                          .map((building) => DropdownMenuItem(
+                        value: building,
+                        child: Text(building.description ?? ''),
+                      ))
+                          .toList(),
+                      onChanged: (building) {
+                        setState(() {
+                          selectedBuilding = building;
+                          selectedSection = null;
+                          selectedPaddock = null;
+                          sections.clear();
+                          paddocks.clear();
+                          if (building != null) {
+                            _fetchSections(building.id!);
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<SectionModel>(
+                      value: selectedSection,
+                      hint: const Text('Bölüm Seçiniz'),
+                      items: sections
+                          .map((section) => DropdownMenuItem(
+                        value: section,
+                        child: Text(section.description ?? ''),
+                      ))
+                          .toList(),
+                      onChanged: (section) {
+                        setState(() {
+                          selectedSection = section;
+                          selectedPaddock = null;
+                          paddocks.clear();
+                          if (section != null) {
+                            _fetchPaddocks(section.id!);
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<PaddockModel>(
+                      value: selectedPaddock,
+                      hint: const Text('Padok Seçiniz'),
+                      items: paddocks
+                          .map((paddock) => DropdownMenuItem(
+                        value: paddock,
+                        child: Text(paddock.description ?? ''),
+                      ))
+                          .toList(),
+                      onChanged: (paddock) {
+                        setState(() {
+                          selectedPaddock = paddock;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedPaddock != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TransferAnimalSelectionPage(paddockId: selectedPaddock!.id!),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Lütfen bir padok seçin'),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Hayvanları Listele'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
-            DropdownButtonFormField<BuildingModel>(
-              value: selectedBuilding,
-              hint: const Text('Bina Seçiniz'),
-              items: buildings
-                  .map((building) => DropdownMenuItem(
-                value: building,
-                child: Text(building.description ?? ''),
-              ))
-                  .toList(),
-              onChanged: (building) {
-                setState(() {
-                  selectedBuilding = building;
-                  selectedSection = null;
-                  selectedPaddock = null;
-                  sections.clear();
-                  paddocks.clear();
-                  if (building != null) {
-                    _fetchSections(building.id!);
-                  }
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<SectionModel>(
-              value: selectedSection,
-              hint: const Text('Bölüm Seçiniz'),
-              items: sections
-                  .map((section) => DropdownMenuItem(
-                value: section,
-                child: Text(section.description ?? ''),
-              ))
-                  .toList(),
-              onChanged: (section) {
-                setState(() {
-                  selectedSection = section;
-                  selectedPaddock = null;
-                  paddocks.clear();
-                  if (section != null) {
-                    _fetchPaddocks(section.id!);
-                  }
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<PaddockModel>(
-              value: selectedPaddock,
-              hint: const Text('Padok Seçiniz'),
-              items: paddocks
-                  .map((paddock) => DropdownMenuItem(
-                value: paddock,
-                child: Text(paddock.description ?? ''),
-              ))
-                  .toList(),
-              onChanged: (paddock) {
-                setState(() {
-                  selectedPaddock = paddock;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedPaddock != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TransferAnimalSelectionPage(paddockId: selectedPaddock!.id!),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lütfen bir padok seçin'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Hayvanları Listele '),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+
 
   Future<void> _fetchBuildings() async {
     try {

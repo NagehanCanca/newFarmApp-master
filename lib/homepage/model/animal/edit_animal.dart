@@ -52,7 +52,7 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   }
 
   @override
-  Widget build(BuildContext context)  {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hayvan Kartını Düzenle'),
@@ -65,75 +65,78 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
         ],
       ),
       body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(''),
-              _buildGenderList(), // Cinsiyet seçimi
-              const SizedBox(height: 12),
-              const Text('Tür'),
-              _buildTypeList(), // Hayvan türleri dropdown menüsü
-              const SizedBox(height: 12),
-              const Text('Irk'),
-              _buildRaceList(),
-              TextFormField(
-                initialValue: _earringNumber,
-                onChanged: (value) {
-                  _earringNumber = value;
-                },
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(''),
+            _buildGenderList(), // Cinsiyet seçimi
+            const SizedBox(height: 12),
+            const Text('Tür'),
+            _buildTypeList(), // Hayvan türleri dropdown menüsü
+            const SizedBox(height: 12),
+            const Text('Irk'),
+            _buildRaceList(),
+            TextFormField(
+              initialValue: _earringNumber,
+              onChanged: (value) {
+                _earringNumber = value;
+              },
+              decoration: const InputDecoration(
+                labelText: 'Küpe Numarası',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              initialValue: _rfid,
+              onChanged: (value) {
+                _rfid = value;
+              },
+              decoration: const InputDecoration(
+                labelText: 'Rfid',
+              ),
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () async {
+                final DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: _birthDate,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (pickedDate != null && pickedDate != _birthDate) {
+                  // setState(() {
+                  //   _birthDate = pickedDate;
+                  // });
+                }
+              },
+              child: InputDecorator(
                 decoration: const InputDecoration(
-                  labelText: 'Küpe Numarası',
+                  labelText: 'Doğum Tarihi',
+                  hintText: 'Doğum Tarihini Seç',
+                  border: OutlineInputBorder(),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(_birthDate.toString().split(' ')[0]),
+                    const Icon(Icons.calendar_today),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _rfid,
-                onChanged: (value) {
-                  _rfid = value;
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Rfid',
-                ),
-              ),
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: () async {
-                  final DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: _birthDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null && pickedDate != _birthDate) {
-                    // setState(() {
-                    //   _birthDate = pickedDate;
-                    // });
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Doğum Tarihi',
-                    hintText: 'Doğum Tarihini Seç',
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(_birthDate.toString().split(' ')[0]),
-                      const Icon(Icons.calendar_today),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
+            ),
+            const SizedBox(height: 12),
+          ],
         ),
       ),
     );
   }
+
 
   Future<void> _saveChanges() async {
     try {
@@ -206,33 +209,60 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   }
 
   Widget _buildRaceList() {
-    String initialRace = _selectedRace != null ? _selectedRace!.raceName ?? '' : ''; // Önceden seçilen türü alın
-
-    return ListTile(
-      title: Text('$initialRace'), // Önceden seçilen türü göster
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return ListView.builder(
-              itemCount: animalRace.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text(animalRace[index].raceName ?? ''),
-                  onTap: () {
-                    setState(() {
-                      _selectedRace = animalRace[index];
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
-    );
+    if (_selectedRace == null) {
+      return ListTile(
+        title: const Text('Irk Seçiniz'),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return ListView.builder(
+                itemCount: animalRace.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(animalRace[index].raceName ?? ''),
+                    onTap: () {
+                      setState(() {
+                        _selectedRace = animalRace[index];
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
+    } else {
+      String initialRace = _selectedRace!.raceName ?? ''; // Önceden seçilen ırkı alın
+      return ListTile(
+        title: Text('$initialRace'), // Önceden seçilen ırkı göster
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return ListView.builder(
+                itemCount: animalRace.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(animalRace[index].raceName ?? ''),
+                    onTap: () {
+                      setState(() {
+                        _selectedRace = animalRace[index];
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
+    }
   }
+
 
   Widget _buildGenderList() {
     return Column(

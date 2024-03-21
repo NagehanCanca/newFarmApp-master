@@ -130,12 +130,6 @@ class _TransferPageState extends State<TransferOperationsPage> {
         ),
         DataColumn(
           label: Text(
-            'Transfer Durumu',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        DataColumn(
-          label: Text(
             'Eski Bina Adı',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -148,7 +142,7 @@ class _TransferPageState extends State<TransferOperationsPage> {
         ),
         DataColumn(
           label: Text(
-            'Eski Bölüm Adı',
+            'Eski Padok Adı',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -195,8 +189,7 @@ class _TransferPageState extends State<TransferOperationsPage> {
             DataCell(Text(transfer.newBuilding?.toString() ?? '')),
             DataCell(Text(transfer.newSection?.toString() ?? '')),
             DataCell(Text(transfer.newPaddock?.toString() ?? '')),
-            DataCell(Text(transfer.newPaddock.toString() ?? '')),
-            DataCell(Text(transfer.updateUser.toString() ?? '')),
+            DataCell(Text(transfer.insertUser.toString() ?? '')),
             DataCell(Text(_formatDate(transfer.updateDate ?? DateTime.now()))),
           ],
         ),

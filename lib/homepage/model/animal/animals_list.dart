@@ -28,24 +28,7 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hayvan Listesi'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.check_box_outlined),
-            onPressed: () {
-              setState(() {
-                if (selectedAnimals.length < animalList.length) {
-                  selectedAnimals = List.from(animalList);
-                } else {
-                  selectedAnimals.clear();
-                }
-              });
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.done),
-            onPressed: () => _bulkVaccination(),
-          ),
-        ],
+        actions: [],
       ),
       body: _buildAnimalList(),
     );
@@ -56,34 +39,22 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
       itemCount: animalList.length,
       itemBuilder: (context, index) {
         final animal = animalList[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AnimalCard(animal: animal),
-                ),
-              );
-            },
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AnimalCard(animal: animal),
+              ),
+            );
+          },
+          child: Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Checkbox(
-                    value: selectedAnimals.contains(animal),
-                    onChanged: (bool? value) {
-                      setState(() {
-                        if (value != null && value) {
-                          selectedAnimals.add(animal);
-                        } else {
-                          selectedAnimals.remove(animal);
-                        }
-                      });
-                    },
-                  ),
                   const SizedBox(width: 16),
                   const Icon(Icons.pets, size: 48),
                   const SizedBox(width: 16),
@@ -110,6 +81,7 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
     );
   }
 
+
   String _formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
   }
@@ -134,39 +106,6 @@ class _AnimalsListPageState extends State<AnimalsListPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error fetching animal list'),
-        ),
-      );
-    }
-  }
-  void _bulkVaccination() async {
-    if (selectedAnimals.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Toplu aşılama için en az bir hayvan seçiniz.'),
-        ),
-      );
-      return;
-    }
-
-    try {
-      // Seçilen hayvanlar için toplu aşılama işlemini burada gerçekleştir
-      // Seçilen hayvanları aşılamak için selectedAnimals listesini kullan
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Seçilen hayvanlar için toplu aşılama başlatıldı.'),
-        ),
-      );
-
-      // Aşılamadan sonra seçilen hayvanlar listesini temizle
-      setState(() {
-        selectedAnimals.clear();
-      });
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Toplu aşılama işlemi sırasında hata oluştu.'),
         ),
       );
     }

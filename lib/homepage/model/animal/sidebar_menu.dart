@@ -192,26 +192,6 @@ class SideBarMenu extends StatelessWidget {
             },
           ),
           SizedBox(height: 10), // Boşluk ekledik
-          ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.white,
-              backgroundImage: AssetImage('assets/images/list.png'),
-              radius: 18,
-            ),
-            title: const Text(
-              'Hayvan Listesi',
-              style: TextStyle(
-                color: Colors.blue, // Metin rengini mavi yapar
-                fontSize: 15,
-              ),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationListPage()),
-              );
-            },
-          ),
         ],
       ),
     );
