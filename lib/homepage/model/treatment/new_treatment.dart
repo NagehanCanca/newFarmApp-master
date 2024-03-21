@@ -225,10 +225,10 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
           'Treatment/AddAnimalTreatment',
           data: {
             'animalId': widget.animal.id,
-            'treatmentStatus': _treatmentStatusController.text,
-            'treatmentDate': _treatmentDateController.text,
-            'diagnosis': _diagnosisController.text,
-            'description': _descriptionController.text,
+            // 'treatmentStatus': _treatmentStatusController.text,
+            // 'treatmentDate': _treatmentDateController.text,
+            // 'diagnosis': _diagnosisController.text,
+            // 'description': _descriptionController.text,
           },
         );
         if (response.statusCode == HttpStatus.ok) {

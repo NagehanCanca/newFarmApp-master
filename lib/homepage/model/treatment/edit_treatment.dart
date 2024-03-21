@@ -38,6 +38,14 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   late int _animalId;
   late double _quantity;
   late int _unitId;
+// Ilac bilgilerini tutan değişkenler
+  late List<TreatmentProductModel> medications = [];
+  late List<ProductUnitModel> units = [];
+  late TextEditingController _customProductController = TextEditingController();
+  late TextEditingController _customQuantityController = TextEditingController();
+  late int _selectedUnitId = 0;
+  late ProductUnitModel? _unitModel;
+
 
   @override
   void initState() {
@@ -55,6 +63,14 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     _animalId = widget.treatment.animalID ?? 0;
     _quantity = treatmentProduct?.quantity ?? 0;
     _unitId = treatmentProduct?.unitId ?? 0;
+    _fetchMedications(_treatmentId);
+    _fetchProductUnits().then((value) {
+      if (units.isNotEmpty) {
+        setState(() {
+          _unitModel = units.first;
+        });
+      }
+    });
   }
 
   @override
@@ -111,6 +127,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                           return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Hata: ${snapshot.error}');
+                        } else if (snapshot.data == null) {
+                          return Text('Veri yok');
                         } else {
                           List<TreatmentProductModel> medications = snapshot.data!;
                           return Column(
@@ -135,35 +153,34 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              if (treatmentProduct != null &&
-                                  treatmentProduct!.unitId != null)
-                                DropdownButtonFormField<int>(
-                                  value: treatmentProduct!.unitId, // Assuming unitId is an int
-                                  items: const [
-                                    DropdownMenuItem<int>(
-                                      value: 1, // Örnek bir birim değeri
-                                      child: Text('Kilogram'),
-                                    ),
-                                    DropdownMenuItem<int>(
-                                      value: 2, // Örnek bir birim değeri
-                                      child: Text('Adet'),
-                                    ),
-                                    // Diğer birimler buraya eklenebilir
-                                  ],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      // Update the selected unit
-                                      treatmentProduct!.unitId = value!;
-                                    });
-                                  },
-                                  decoration: const InputDecoration(
-                                    labelText: 'Birim',
-                                    border: OutlineInputBorder(),
-                                  ),
+                              DropdownButtonFormField<ProductUnitModel>(
+                                value: unitModel,
+                                items: _buildUnitDropdownItems(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    unitModel = value!;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: 'Birim',
+                                  border: OutlineInputBorder(),
                                 ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: _customQuantityController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Miktar',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  _quantity = double.parse(value);
+                                },
+                              ),
                               const SizedBox(height: 12),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Butonları eşit aralıklarla yerleştirir
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton(
                                     onPressed: _addMedication,
@@ -217,7 +234,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                               ),
                             ],
                           );
-                        }
+                      }
                       },
                     ),
                   ],
@@ -228,6 +245,19 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
         ),
       ),
     );
+  }
+
+  List<DropdownMenuItem<ProductUnitModel>> _buildUnitDropdownItems() {
+    if (_unitModel == null) {
+      return [];
+    } else {
+      return units.map((unit) {
+        return DropdownMenuItem<ProductUnitModel>(
+          value: unit,
+          child: Text(unit.unitId.toString()),
+        );
+      }).toList();
+    }
   }
 
   void _addMedication() async {
@@ -272,8 +302,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
         if (productId != null) {
           Response response = await dio.delete(
-            'TreatmentNote/DeleteTreatmentNote',
-            queryParameters: {'id': productId},
+            'TreatmentProduct/DeleteTreatmentProduct',
           );
 
           if (response.statusCode == HttpStatus.ok) {
@@ -303,11 +332,32 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
+  Future<void> _fetchProductUnits() async {
+    try {
+      Response response = await dio.get(
+        'ProductUnit/GetAllProductUnits',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data;
+        units = responseData
+            .map((json) => ProductUnitModel.fromJson(json))
+            .toList();
+        setState(() {});
+      } else {
+        throw Exception('HTTP Error ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('An error occurred while fetching product units');
+    }
+  }
 
   Future<List<TreatmentProductModel>> _fetchMedications(int treatmentId) async {
     try {
       Response response = await dio.get(
-        'ProductUnit/GetAllProductUnits',
+        'TreatmentProduct/GetAllTreatmentProducts',
+        queryParameters: {'treatmentId': treatmentId},
       );
 
       if (response.statusCode == HttpStatus.ok) {
@@ -321,9 +371,10 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       }
     } catch (e) {
       print('Error: $e');
-      throw Exception('An error occurred while fetching data');
+      throw Exception('An error occurred while fetching medications');
     }
   }
+
 
   void _addNote() async {
     try {
@@ -355,8 +406,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
-
-
   void _deleteNote() async {
     try {
       Response response = await dio.delete(
@@ -371,7 +420,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
             duration: Duration(seconds: 2),
           ),
         );
-        // Not silindikten sonra not listesini yenilemek için gerekli kodu buraya ekle
       } else {
         throw Exception('HTTP Hatası ${response.statusCode}');
       }
@@ -495,7 +543,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                   _showDiagnosesBottomSheet(
                       diagnoses.map((e) => e.name).toList());
                 },
-
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),

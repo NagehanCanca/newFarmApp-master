@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/model/treatment_model.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/transfer_model.dart';
@@ -16,6 +17,7 @@ class AnimalDetailsPage extends StatefulWidget {
 
 class _AnimalDetailsPageState extends State<AnimalDetailsPage> {
   late List<TransferModel> transferInfo;
+  late List<TreatmentModel> treatmentInfo;
   late PageController _pageController;
   int _selectedIndex = 0;
 
@@ -23,6 +25,7 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> {
   void initState() {
     super.initState();
     transferInfo = []; // transferInfo'yu başlatıyoruz
+    treatmentInfo = [];
     _fetchTransferInfo(widget.animal.id!);
     _pageController = PageController(initialPage: _selectedIndex);
   }
@@ -71,26 +74,53 @@ class _AnimalDetailsPageState extends State<AnimalDetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Transfer Bilgileri:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            height: 1,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          'Transfer Bilgileri',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 10),
+                            height: 1,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   if (transferInfo.isNotEmpty)
-                    DataTable(
-                      columns: const [
-                        DataColumn(label: Text('Eski')),
-                        DataColumn(label: Text('Yeni')),
-                        DataColumn(label: Text('İşlem Yapan')),
-                        DataColumn(label: Text('İşlem Tarihi')),
-                      ],
-                      rows: [
-                        DataRow(cells: [
-                          DataCell(Text(transferInfo[0].oldPaddockString())),
-                          DataCell(Text(transferInfo[0].newPaddockString())),
-                          DataCell(Text(transferInfo[0].insertUser ?? '')),
-                          DataCell(Text(transferInfo[0].date?.toString() ?? '')),
-                        ]),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: const [
+                          DataColumn(label: Text('Eski')),
+                          DataColumn(label: Text('Yeni')),
+                          DataColumn(label: Text('İşlem Yapan')),
+                          DataColumn(label: Text('İşlem Tarihi')),
+                        ],
+                        rows: [
+                          DataRow(cells: [
+                            DataCell(Text(transferInfo[0].oldPaddockString())),
+                            DataCell(Text(transferInfo[0].newPaddockString())),
+                            DataCell(Text(transferInfo[0].insertUser ?? '')),
+                            DataCell(Text(transferInfo[0].date?.toString() ?? '')),
+                          ]),
+                        ],
+                      ),
                     ),
                   if (transferInfo.isEmpty)
                     const Text('Transfer bilgileri bulunamadı.'),
