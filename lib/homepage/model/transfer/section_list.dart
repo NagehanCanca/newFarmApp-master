@@ -11,7 +11,6 @@ import '../../../service/base.service.dart';
 class SectionList extends StatefulWidget {
   final int buildingId;
   final AnimalModel animal;
-
   const SectionList({Key? key, required this.buildingId, required this.animal}) : super(key: key);
 
   @override
@@ -19,20 +18,22 @@ class SectionList extends StatefulWidget {
 }
 
 class _SectionListState extends State<SectionList> {
-  late List<SectionModel> sections;
+  late List<SectionModel> sections = [];
+ int? selectedId;
 
   @override
   void initState() {
     super.initState();
-    sections = []; // Başlangıçta boş liste ile başlayalım
-    _fetchSections(); // Bölümleri getiren metodu çağıralım
+
+   _fetchSections(); // Bölümleri getiren metodu çağıralım
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bölümler'),
+        title: Text(selectedId.toString()??''),
       ),
       body: ListView.builder(
         itemCount: sections.length,
@@ -41,6 +42,10 @@ class _SectionListState extends State<SectionList> {
             title: Text(sections[index].description ?? ''),
             subtitle: Text(sections[index].code ?? ''),
             onTap: () {
+              setState(() {
+                selectedId =  sections[index].id;
+              });
+
               // Tıklanan binanın detay sayfasına gitmek için navigator kullanabilirsiniz
               Navigator.push(
                 context,
@@ -62,10 +67,10 @@ class _SectionListState extends State<SectionList> {
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response
             .data; // API'den gelen veri listesi
-        setState(() {
-          sections =
-              responseData.map((json) => SectionModel.fromJson(json)).toList();
-        });
+setState(() {
+  sections =  responseData.map((json) => SectionModel.fromJson(json)).toList();
+});
+
       } else {
         throw Exception('HTTP Hatası ${response.statusCode}');
       }

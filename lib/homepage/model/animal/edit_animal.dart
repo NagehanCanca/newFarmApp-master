@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/animal_type_model.dart';
+import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../model/animal_race_model.dart';
@@ -26,7 +27,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
   late List<AnimalRaceModel> animalRace = [];
   late String _buildDescription;
   late String? _rfid;
-  final int updateUserId = 1;
   late int _selectedTypeId;
   late int _selectedRaceId;
   AnimalTypeModel? _selectedType;
@@ -150,7 +150,10 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
         widget.animal.animalGender = _selectedGender;
 
         Response response = await dio.put(
-        'Animal/UpdateAnimalInfo?updateUserId=$updateUserId',
+        'Animal/UpdateAnimalInfo?updateUserId',
+        queryParameters: {
+          "updateUserId": cachemanager.getItem(0)!.id!
+        },
         data: widget.animal.toJson(),
       );
       if (response.statusCode == HttpStatus.ok) {
@@ -296,18 +299,6 @@ class _EditAnimalPageState extends State<EditAnimalPage> {
       ],
     );
   }
-
-  AnimalGender? _formatGender(String? gender) {
-    switch (gender) {
-      case 'Erkek':
-        return AnimalGender.Masculine;
-      case 'Dişi':
-        return AnimalGender.Feminine;
-      default:
-        return null;
-    }
-  }
-
 
 // API'den hayvan türlerini çeken metod
   Future<void> _fetchAnimalTypes() async {

@@ -16,14 +16,13 @@ class TransferAnimalSearchWidget extends StatefulWidget {
 
 class _TransferAnimalSearchWidgetState extends State<TransferAnimalSearchWidget> {
   TextEditingController searchController = TextEditingController();
-  AnimalModel? selectedAnimal;
+
   List<BuildingModel> buildings = [];
   List<SectionModel> sections = [];
   List<PaddockModel> paddocks = [];
   BuildingModel? selectedBuilding;
   SectionModel? selectedSection;
   PaddockModel? selectedPaddock;
-  String animalRfid = "";
 
   @override
   void initState() {
@@ -57,13 +56,7 @@ class _TransferAnimalSearchWidgetState extends State<TransferAnimalSearchWidget>
                 child: const Text('Hayvan Ara'),
               ),
               const SizedBox(height: 16),
-              if (selectedAnimal != null) ...[
-                // ListTile(
-                //   title: Text(selectedAnimal!.animalTypeDescription ?? ''),
-                //   subtitle: Text(selectedAnimal!.buildDescription ?? ''),
-                // ),
-                const SizedBox(height: 32),
-              ],
+              //
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -238,27 +231,27 @@ class _TransferAnimalSearchWidgetState extends State<TransferAnimalSearchWidget>
       );
       if (response.statusCode == HttpStatus.ok) {
         if (response.data != null) {
-          AnimalModel animal = AnimalModel.fromJson(response.data);
-          setState(() {
-            selectedAnimal = animal;
-          });
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AnimalCard(animal: animal),
+              builder: (context) => AnimalCard(animal: AnimalModel.fromJson(response.data)),
             ),
           );
         } else {
-          setState(() {
-            animalRfid = "Bulunmuyor";
-          });
+          //setState(() {
+          //  animalRfid = "Bulunmuyor";
+          //});
         }
       }
     } catch (e, stackTrace) {
       print('Hata: $e, $stackTrace');
-      setState(() {
-        animalRfid = "Bir hata oluştu";
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+            content:  Text(searchController.text.toString()),
+          ),);
+      //setState(() {
+      //  animalRfid = "Bir hata oluştu";
+      //});
     }
   }
 }

@@ -6,17 +6,21 @@ part 'animal_type_model.g.dart';
 class AnimalTypeModel {
   int? id;
   String? description;
-  String? insertUser;
+  int? insertUser;
+  String? insertUserDescription;
   DateTime? insertDate;
-  String? updateUser;
+  int? updateUser;
+  String? updateUserDescription;
   DateTime? updateDate;
 
   AnimalTypeModel({
     this.id,
     this.description,
     this.insertUser,
+    this.insertUserDescription,
     this.insertDate,
     this.updateUser,
+    this.updateUserDescription,
     this.updateDate,
   });
 
@@ -25,9 +29,15 @@ class AnimalTypeModel {
       id: json['id'],
       description: json['description'],
       insertUser: json['insertUser'],
-      insertDate: json['insertDate'] != null ? DateTime.parse(json['insertDate']) : null,
+      insertUserDescription: json['insertUserDescription'],
+      insertDate: json['insertDate'] != null
+          ? DateTime.parse(json['insertDate'])
+          : null,
       updateUser: json['updateUser'],
-      updateDate: json['updateDate'] != null ? DateTime.parse(json['updateDate']) : null,
+      updateUserDescription: json['updateUserDescription'],
+      updateDate: json['updateDate'] != null
+          ? DateTime.parse(json['updateDate'])
+          : null,
     );
   }
 
@@ -36,8 +46,10 @@ class AnimalTypeModel {
       'id': id,
       'description': description,
       'insertUser': insertUser,
+      'insertUserDescription': insertUserDescription,
       'insertDate': insertDate?.toIso8601String(),
       'updateUser': updateUser,
+      'updateUserDescription' : updateUserDescription,
       'updateDate': updateDate?.toIso8601String(),
     };
   }

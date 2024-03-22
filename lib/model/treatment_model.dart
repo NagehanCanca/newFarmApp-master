@@ -4,7 +4,7 @@ part 'treatment_model.g.dart';
 
 @JsonSerializable()
 class TreatmentModel {
-  int id;
+  int? id;
   TreatmentStatus treatmentStatus;
   int animalID;
   String? animalEarringNumber;
@@ -25,7 +25,7 @@ class TreatmentModel {
   String? updateUserDescription;
   DateTime? updateDate;
   TreatmentModel({
-    required this.id,
+    this.id,
     required this.treatmentStatus,
     required this.animalID,
     this.animalEarringNumber,

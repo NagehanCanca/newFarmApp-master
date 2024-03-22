@@ -5,6 +5,7 @@ import 'package:farmsoftnew/model/disease_diagnose_model.dart';
 import 'package:farmsoftnew/model/product_unit_model.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
+import '../../../model/product_model.dart';
 import '../../../model/treatment_model.dart';
 import '../../../model/treatment_note_model.dart';
 import '../../../model/treatment_product_model.dart';
@@ -31,21 +32,19 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   late List<DiseaseDiagnoseModel> _diagnoses;
   late TextEditingController _noteController;
   late TextEditingController _productController;
-  late ProductUnitModel unitModel;
   late int _treatmentId;
   late int _noteId;
   late TreatmentProductModel? treatmentProduct = null;
-  late int _animalId;
   late double _quantity;
   late int _unitId;
 // Ilac bilgilerini tutan değişkenler
-  late List<TreatmentProductModel> medications = [];
+  //late List<ProductModel> medications = [];
   late List<ProductUnitModel> units = [];
   late TextEditingController _customProductController = TextEditingController();
   late TextEditingController _customQuantityController = TextEditingController();
-  late int _selectedUnitId = 0;
-  late ProductUnitModel? _unitModel;
-
+  int? _selectedUnitId;
+  ProductUnitModel? _unitModel;
+  int? _selectedProductId;
 
   @override
   void initState() {
@@ -60,10 +59,9 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     _noteController = TextEditingController();
     _productController = TextEditingController();
     _treatmentId = widget.treatment.id ?? 0;
-    _animalId = widget.treatment.animalID ?? 0;
+
     _quantity = treatmentProduct?.quantity ?? 0;
     _unitId = treatmentProduct?.unitId ?? 0;
-    _fetchMedications(_treatmentId);
     _fetchProductUnits().then((value) {
       if (units.isNotEmpty) {
         setState(() {
@@ -120,8 +118,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                   children: [
                     _buildTreatmentFields(),
                     const SizedBox(height: 20),
-                    FutureBuilder<List<TreatmentProductModel>>(
-                      future: _fetchMedications(_treatmentId),
+                    FutureBuilder<List<ProductModel>>(
+                      future: _fetchMedications(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const CircularProgressIndicator();
@@ -130,21 +128,24 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                         } else if (snapshot.data == null) {
                           return Text('Veri yok');
                         } else {
-                          List<TreatmentProductModel> medications = snapshot.data!;
+
+                            List<ProductModel> medications = snapshot.data!;
+
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              DropdownButtonFormField<TreatmentProductModel>(
-                                value: treatmentProduct,
+                              DropdownButtonFormField<int>(
+                                value: _selectedProductId,
                                 items: medications.map((medication) {
-                                  return DropdownMenuItem<TreatmentProductModel>(
-                                    value: medication,
-                                    child: Text(medication.productDescription),
+                                  return DropdownMenuItem<int>(
+                                    value: medication.id,
+                                    child: Text(medication.description),
                                   );
                                 }).toList(),
                                 onChanged: (value) {
                                   setState(() {
-                                    treatmentProduct = value;
+                                    _selectedProductId = value;
                                   });
                                 },
                                 decoration: const InputDecoration(
@@ -153,12 +154,12 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              DropdownButtonFormField<ProductUnitModel>(
-                                value: unitModel,
-                                items: _buildUnitDropdownItems(),
+                              DropdownButtonFormField<int>(
+                                value: _selectedProductId,
+                                items:null,// _buildUnitDropdownItems(),
                                 onChanged: (value) {
                                   setState(() {
-                                    unitModel = value!;
+                                    _selectedProductId = value!;
                                   });
                                 },
                                 decoration: const InputDecoration(
@@ -262,9 +263,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   void _addMedication() async {
     try {
-      treatmentProduct?.treatmentId = _treatmentId;
+        treatmentProduct?.productId = _selectedProductId!;
       treatmentProduct?.unitId = _unitId;
-      treatmentProduct?.animalId = _animalId;
       treatmentProduct?.insertUser = cachemanager.getItem(0)!.id!;
       treatmentProduct?.quantity = _quantity;
       Response response = await dio.post(
@@ -353,17 +353,16 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
-  Future<List<TreatmentProductModel>> _fetchMedications(int treatmentId) async {
+  Future<List<ProductModel>> _fetchMedications() async {
     try {
       Response response = await dio.get(
-        'TreatmentProduct/GetAllTreatmentProducts',
-        queryParameters: {'treatmentId': treatmentId},
+        'Product/GetAllProducts',
       );
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
-        List<TreatmentProductModel> medications = responseData
-            .map((json) => TreatmentProductModel.fromJson(json))
+        List<ProductModel> medications = responseData
+            .map((json) => ProductModel.fromJson(json))
             .toList();
         return medications;
       } else {
@@ -381,7 +380,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
       Response response = await dio.post(
         'TreatmentNote/AddTreatmentNote',
-        data: TreatmentNoteModel(treatmentId: widget.treatment.id, date: DateTime.now(),
+        data: TreatmentNoteModel(treatmentId: widget.treatment.id!, date: DateTime.now(),
             notes: _noteController.text, insertUser: cachemanager.getItem(0)!.id!));
 
       if (response.statusCode == HttpStatus.ok) {
@@ -472,7 +471,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
             labelText: 'Padok',
           ),
           controller: TextEditingController(
-              text: selectedAnimal.paddockDescription ?? ''),
+              text:selectedAnimal.paddockDescription ?? ''),
           enabled: false,
         ),
       ],
@@ -653,7 +652,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       widget.treatment.date = _selectedDate;
       widget.treatment.diseaseDiagnoseId = _selectedDiagnosis ?? 0;
       widget.treatment.notes = _descriptionController.text;
-
+      widget.treatment.updateUser = cachemanager.getItem(0)!.id!;
       Response response = await dio.put(
         'Treatment/UpdateAnimalTreatment',
         data: widget.treatment.toJson(),

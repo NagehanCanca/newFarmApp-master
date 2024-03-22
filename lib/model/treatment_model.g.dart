@@ -8,7 +8,7 @@ part of 'treatment_model.dart';
 
 TreatmentModel _$TreatmentModelFromJson(Map<String, dynamic> json) =>
     TreatmentModel(
-      id: json['id'] as int,
+      id: json['id'] as int?,
       treatmentStatus:
       $enumDecode(_$TreatmentStatusEnumMap, json['treatmentStatus']),
       animalID: json['animalID'] as int,

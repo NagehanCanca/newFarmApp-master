@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/model/base_cache_manager.dart';
+import 'package:farmsoftnew/model/disease_diagnose_model.dart';
+import 'package:farmsoftnew/model/treatment_model.dart';
 import 'package:flutter/material.dart';
 import '../../../model/animal_model.dart';
 import '../../../service/base.service.dart';
@@ -15,15 +18,13 @@ class NewTreatmentPage extends StatefulWidget {
 }
 
 class _NewTreatmentPageState extends State<NewTreatmentPage> {
-  late TextEditingController _statusController;
-  late TextEditingController _entryDateController;
-  late TextEditingController _earringNumberController;
-  late TextEditingController _corralNameController;
-  late TextEditingController _treatmentStatusController;
+  late List<DiseaseDiagnoseModel> diseaseDiagnose = [];
   late TextEditingController _treatmentDateController;
   late TextEditingController _diagnosisController;
   late TextEditingController _descriptionController;
   String? _selectedTreatmentStatus;
+  DiseaseDiagnoseModel? _selectedDiagnosis;
+  DateTime? _selectedDate;
   List<String> _treatmentStatusList = [
     'Yeni Tedavi',
     'Sonlanmış Tedavi',
@@ -32,11 +33,7 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
   @override
   void initState() {
     super.initState();
-    _statusController = TextEditingController();
-    _entryDateController = TextEditingController();
-    _earringNumberController = TextEditingController(text: widget.animal.earringNumber);
-    _corralNameController = TextEditingController();
-    _treatmentStatusController = TextEditingController();
+    _fetchDiagnoses();
     _treatmentDateController = TextEditingController();
     _diagnosisController = TextEditingController();
     _descriptionController = TextEditingController();
@@ -145,15 +142,9 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
             ),
           ),
         ),
-        GestureDetector(
-          onTap: _showDiagnosesBottomSheet,
-          child: AbsorbPointer(
-            child: TextField(
-              controller: _diagnosisController,
-              decoration: const InputDecoration(labelText: 'Tanı'),
-            ),
-          ),
-        ),
+        const Text('Tür'),
+        _buildDiseaseList(),
+        const SizedBox(height: 12),
         TextField(
           controller: _descriptionController,
           decoration: const InputDecoration(labelText: 'Not'),
@@ -161,6 +152,7 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
       ],
     );
   }
+
 
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -172,44 +164,22 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
     if (picked != null) {
       setState(() {
         _treatmentDateController.text = picked.toString().split(' ')[0];
+        _selectedDate = picked;
       });
     }
   }
-  void _showDiagnosesBottomSheet() async {
-    List<String> diagnoses = await _fetchDiagnoses();
 
-    await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200,
-          child: ListView.builder(
-            itemCount: diagnoses.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text(diagnoses[index]),
-                onTap: () {
-                  Navigator.pop(context, diagnoses[index]);
-                },
-              );
-            },
-          ),
-        );
-      },
-    ).then((selectedDiagnosis) {
-      if (selectedDiagnosis != null) {
-        _diagnosisController.text = selectedDiagnosis;
-      }
-    });
-  }
-  Future<List<String>> _fetchDiagnoses() async {
+  Future<void> _fetchDiagnoses() async {
     try {
       Response response = await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
-        List<String> diagnoses = responseData.map((item) => item['name'].toString()).toList();
-        return diagnoses;
+       setState(() {
+         diseaseDiagnose = responseData.map((json) => DiseaseDiagnoseModel.fromJson(json))
+             .toList();
+       });
+
       } else {
         throw Exception('HTTP Hatası ${response.statusCode}');
       }
@@ -221,15 +191,17 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
 
   void _submitTreatment() async {
       try {
+
         Response response = await dio.post(
           'Treatment/AddAnimalTreatment',
-          data: {
-            'animalId': widget.animal.id,
-            // 'treatmentStatus': _treatmentStatusController.text,
-            // 'treatmentDate': _treatmentDateController.text,
-            // 'diagnosis': _diagnosisController.text,
-            // 'description': _descriptionController.text,
-          },
+          data: TreatmentModel (
+            animalID:  widget.animal.id!,
+            treatmentStatus: TreatmentStatus.NewTreatment,
+            date:_selectedDate!,
+            diseaseDiagnoseId:_selectedDiagnosis!.id,
+           insertUser: cachemanager.getItem(0)!.id!,
+            notes:_descriptionController.text,
+          ).toJson(),
         );
         if (response.statusCode == HttpStatus.ok) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -265,6 +237,32 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
       default:
         return 'Bilinmiyor';
     }
+  }
+  Widget _buildDiseaseList() {
+    return ListTile(
+      title: Text('Tanı seçiniz'),
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return ListView.builder(
+              itemCount: diseaseDiagnose.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(diseaseDiagnose[index].name ?? ''),
+                  onTap: () {
+                    setState(() {
+    _selectedDiagnosis = diseaseDiagnose[index];
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
 }
