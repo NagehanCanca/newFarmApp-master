@@ -9,18 +9,18 @@ part of 'treatment_product_model.dart';
 TreatmentProductModel _$TreatmentProductModelFromJson(
         Map<String, dynamic> json) =>
     TreatmentProductModel(
-      id: json['id'] as int,
-      treatmentId: json['treatmentId'] as int,
-      animalId: json['animalId'] as int,
-      productId: json['productId'] as int,
-      productDescription: json['productDescription'] as String,
-      unitId: json['unitId'] as int,
+      id: json['id'] as int?,
+      treatmentId: json['treatmentId'] as int?,
+      animalId: json['animalId'] as int?,
+      productId: json['productId'] as int?,
+      productDescription: json['productDescription'] as String?,
+      unitId: json['unitId'] as int?,
       quantity: (json['quantity'] as num).toDouble(),
-      insertUser: json['insertUser'] as int,
-      insertUserDescription: json['insertUserDescription'] as String,
+      insertUser: json['insertUser'] as int?,
+      insertUserDescription: json['insertUserDescription'] as String?,
       insertDate: DateTime.parse(json['insertDate'] as String),
-      updateUser: json['updateUser'] as int,
-      updateUserDescription: json['updateUserDescription'] as String,
+      updateUser: json['updateUser'] as int?,
+      updateUserDescription: json['updateUserDescription'] as String?,
       updateDate: json['updateDate'] == null
           ? null
           : DateTime.parse(json['updateDate'] as String),
@@ -38,7 +38,7 @@ Map<String, dynamic> _$TreatmentProductModelToJson(
       'quantity': instance.quantity,
       'insertUser': instance.insertUser,
       'insertUserDescription': instance.insertUserDescription,
-      'insertDate': instance.insertDate.toIso8601String(),
+      'insertDate': instance.insertDate?.toIso8601String(),
       'updateUser': instance.updateUser,
       'updateUserDescription': instance.updateUserDescription,
       'updateDate': instance.updateDate?.toIso8601String(),

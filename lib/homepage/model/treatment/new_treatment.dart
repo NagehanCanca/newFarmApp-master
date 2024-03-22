@@ -85,14 +85,16 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Durumu',
           ),
-          controller: TextEditingController(text: getStatusText(widget.animal.animalStatus!)),
+          controller: TextEditingController(
+              text: getStatusText(widget.animal.animalStatus!)),
         ),
         TextField(
           readOnly: true,
           decoration: const InputDecoration(
             labelText: 'Çiftliğe Giriş Tarihi',
           ),
-          controller: TextEditingController(text: widget.animal.farmInsertDate.toString().split(' ')[0]),
+          controller: TextEditingController(
+              text: widget.animal.farmInsertDate.toString().split(' ')[0]),
         ),
         TextField(
           readOnly: true,
@@ -107,7 +109,8 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Padok',
           ),
-          controller: TextEditingController(text: widget.animal.paddockDescription),
+          controller: TextEditingController(
+              text: widget.animal.paddockDescription),
           enabled: false,
         ),
       ],
@@ -118,20 +121,14 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
-          value: _selectedTreatmentStatus,
-          hint: const Text('Tedavi Durumu Seçiniz'),
-          items: _treatmentStatusList.map((String status) {
-            return DropdownMenuItem<String>(
-              value: status,
-              child: Text(status),
-            );
-          }).toList(),
-          onChanged: (String? value) {
-            setState(() {
-              _selectedTreatmentStatus = value!;
-            });
-          },
+        TextField(
+          enabled: false,
+          readOnly: true,
+          decoration: const InputDecoration(
+            labelText: 'Tedavi Durumu',
+          ),
+          controller: TextEditingController(
+              text: _treatmentStatusList.first),
         ),
         GestureDetector(
           onTap: _selectDate,
@@ -142,7 +139,6 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
             ),
           ),
         ),
-        const Text('Tür'),
         _buildDiseaseList(),
         const SizedBox(height: 12),
         TextField(
@@ -171,15 +167,16 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
 
   Future<void> _fetchDiagnoses() async {
     try {
-      Response response = await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
+      Response response = await dio.get(
+          'DiseaseDiagnose/GetAllDiseaseDiagnoses');
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
-       setState(() {
-         diseaseDiagnose = responseData.map((json) => DiseaseDiagnoseModel.fromJson(json))
-             .toList();
-       });
-
+        setState(() {
+          diseaseDiagnose =
+              responseData.map((json) => DiseaseDiagnoseModel.fromJson(json))
+                  .toList();
+        });
       } else {
         throw Exception('HTTP Hatası ${response.statusCode}');
       }
@@ -190,40 +187,40 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
   }
 
   void _submitTreatment() async {
-      try {
-
-        Response response = await dio.post(
-          'Treatment/AddAnimalTreatment',
-          data: TreatmentModel (
-            animalID:  widget.animal.id!,
-            treatmentStatus: TreatmentStatus.NewTreatment,
-            date:_selectedDate!,
-            diseaseDiagnoseId:_selectedDiagnosis!.id,
-           insertUser: cachemanager.getItem(0)!.id!,
-            notes:_descriptionController.text,
-          ).toJson(),
-        );
-        if (response.statusCode == HttpStatus.ok) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tedavi başlatıldı.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          Navigator.pop(context); // Önceki sayfaya geri dön
-        } else {
-          throw Exception('HTTP Hatası ${response.statusCode}');
-        }
-      } catch (e) {
-        print('Hata: $e');
+    try {
+      Response response = await dio.post(
+        'Treatment/AddAnimalTreatment',
+        data: TreatmentModel(
+          animalID: widget.animal.id!,
+          treatmentStatus: TreatmentStatus.NewTreatment,
+          date: _selectedDate!,
+          diseaseDiagnoseId: _selectedDiagnosis!.id,
+          insertUser: cachemanager.getItem(0)!.id!,
+          notes: _descriptionController.text,
+        ).toJson(),
+      );
+      if (response.statusCode == HttpStatus.ok) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tedavi başlatılırken bir hata oluştu'),
+            content: Text('Tedavi başlatıldı.'),
             duration: Duration(seconds: 2),
           ),
         );
+        Navigator.pop(context); // Önceki sayfaya geri dön
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
       }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tedavi başlatılırken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
+  }
+
   String getStatusText(AnimalStatus status) {
     switch (status) {
       case AnimalStatus.Normal:
@@ -238,9 +235,16 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
         return 'Bilinmiyor';
     }
   }
+
   Widget _buildDiseaseList() {
-    return ListTile(
-      title: Text('Tanı seçiniz'),
+    return TextField(
+      readOnly: true,
+      decoration: const InputDecoration(
+        labelText: 'Tanı Seçiniz',
+      ),
+      controller: TextEditingController(
+        text: _selectedDiagnosis?.name ?? '',
+      ),
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -252,7 +256,7 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
                   title: Text(diseaseDiagnose[index].name ?? ''),
                   onTap: () {
                     setState(() {
-    _selectedDiagnosis = diseaseDiagnose[index];
+                      _selectedDiagnosis = diseaseDiagnose[index];
                     });
                     Navigator.pop(context);
                   },
@@ -264,5 +268,4 @@ class _NewTreatmentPageState extends State<NewTreatmentPage> {
       },
     );
   }
-
 }

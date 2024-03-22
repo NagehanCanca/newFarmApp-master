@@ -23,7 +23,7 @@ class _NotificationListPageState extends State<NotificationListPage> {
 
   Future<void> _fetchNotifications() async {
     setState(() {
-      _isLoading = true; // Veri çekilmeye başlandığında yükleniyor göstergesini göster
+      _isLoading = true;
     });
     try {
       Response response = await dio.get(

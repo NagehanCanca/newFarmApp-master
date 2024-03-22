@@ -8,18 +8,18 @@ part of 'product_unit_model.dart';
 
 ProductUnitModel _$ProductUnitModelFromJson(Map<String, dynamic> json) {
   return ProductUnitModel(
-    id: json['id'] as int,
+    id: json['id'] as int?,
     producId: json['producId'] as int,
     unitId: json['unitId'] as int,
-    code: json['code'] as String,
-    description: json['description'] as String,
+    code: json['code'] as String?,
+    description: json['description'] as String?,
     quantity: (json['quantity'] as num).toDouble(),
-    isMain: json['isMain'] as bool,
+    isMain: json['isMain'] as bool?,
     insertUser: json['insertUser'] as String,
     insertDate: json['insertDate'] == null
         ? null
         : DateTime.parse(json['insertDate'] as String),
-    updateUser: json['updateUser'] as String,
+    updateUser: json['updateUser'] as String?,
     updateDate: json['updateDate'] == null
         ? null
         : DateTime.parse(json['updateDate'] as String),

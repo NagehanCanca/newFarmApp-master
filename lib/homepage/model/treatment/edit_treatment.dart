@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/homepage/model/treatment/notes_medications.dart';
 import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:farmsoftnew/model/disease_diagnose_model.dart';
 import 'package:farmsoftnew/model/product_unit_model.dart';
@@ -25,50 +26,39 @@ class EditTreatmentPage extends StatefulWidget {
 
 class _EditTreatmentPageState extends State<EditTreatmentPage> {
   late DateTime _selectedDate;
-  late TextEditingController _diagnosisController;
   late TextEditingController _descriptionController;
   late int _selectedDiagnosis;
   late AnimalModel selectedAnimal = AnimalModel();
   late List<DiseaseDiagnoseModel> _diagnoses;
   late TextEditingController _noteController;
-  late TextEditingController _productController;
   late int _treatmentId;
-  late int _noteId;
-  late TreatmentProductModel? treatmentProduct = null;
+  int? _noteId;
   late double _quantity;
   late int _unitId;
-// Ilac bilgilerini tutan değişkenler
-  //late List<ProductModel> medications = [];
-  late List<ProductUnitModel> units = [];
-  late TextEditingController _customProductController = TextEditingController();
+  late int _animalId;
   late TextEditingController _customQuantityController = TextEditingController();
-  int? _selectedUnitId;
+  ProductModel? _selectedProductId;
   ProductUnitModel? _unitModel;
-  int? _selectedProductId;
+  List<ProductModel> medications = [];
+  List<ProductUnitModel> _units = [];
+  TreatmentProductModel? treatmentProduct = TreatmentProductModel();
+  TreatmentNoteModel? treatmentNote;
 
   @override
   void initState() {
     super.initState();
     _fetchAnimal();
     _selectedDate = widget.treatment.date;
-    _diagnosisController = TextEditingController(
-        text: widget.treatment.diseaseDiagnoseId.toString());
-    _descriptionController = TextEditingController(
-        text: widget.treatment.notes);
+    _descriptionController =
+        TextEditingController(text: widget.treatment.notes);
     _selectedDiagnosis = widget.treatment.diseaseDiagnoseId ?? 0;
     _noteController = TextEditingController();
-    _productController = TextEditingController();
     _treatmentId = widget.treatment.id ?? 0;
-
+    _animalId = widget.treatment.animalID ?? 0;
     _quantity = treatmentProduct?.quantity ?? 0;
     _unitId = treatmentProduct?.unitId ?? 0;
-    _fetchProductUnits().then((value) {
-      if (units.isNotEmpty) {
-        setState(() {
-          _unitModel = units.first;
-        });
-      }
-    });
+    _noteId = treatmentNote?.id ?? 0;
+    _fetchMedications();
   }
 
   @override
@@ -76,6 +66,19 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tedavi Düzenle'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notes),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotesAndMedicationsPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -118,125 +121,116 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                   children: [
                     _buildTreatmentFields(),
                     const SizedBox(height: 20),
-                    FutureBuilder<List<ProductModel>>(
-                      future: _fetchMedications(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Hata: ${snapshot.error}');
-                        } else if (snapshot.data == null) {
-                          return Text('Veri yok');
-                        } else {
-
-                            List<ProductModel> medications = snapshot.data!;
-
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              DropdownButtonFormField<int>(
-                                value: _selectedProductId,
-                                items: medications.map((medication) {
-                                  return DropdownMenuItem<int>(
-                                    value: medication.id,
-                                    child: Text(medication.description),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedProductId = value;
-                                  });
-                                },
-                                decoration: const InputDecoration(
-                                  labelText: 'İlaç',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              DropdownButtonFormField<int>(
-                                value: _selectedProductId,
-                                items:null,// _buildUnitDropdownItems(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedProductId = value!;
-                                  });
-                                },
-                                decoration: const InputDecoration(
-                                  labelText: 'Birim',
-                                  border: OutlineInputBorder(),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              TextField(
-                                controller: _customQuantityController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Miktar',
-                                  border: OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) {
-                                  _quantity = double.parse(value);
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: _addMedication,
-                                    child: const Text('Ekle'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: _deleteMedication,
-                                    child: const Text('Sil'),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              TextField(
-                                controller: _noteController,
-                                decoration: const InputDecoration(labelText: 'Not'),
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Butonları eşit aralıklarla yerleştirir
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: _addNote,
-                                    child: const Text('Ekle'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: _deleteNote,
-                                    child: const Text('Sil'),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: _endTreatment,
-                                      child: const Text('Tedaviyi Sonlandır'),
-                                      style: ElevatedButton.styleFrom(
-                                        primary: Colors.orange,
-                                        minimumSize: const Size(double.infinity, 40), // Genişlik ve yükseklik ayarları
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                      }
+                    DropdownButtonFormField<ProductModel>(
+                      value: _selectedProductId,
+                      hint: const Text('İlaç Seçiniz'),
+                      items: medications
+                          ?.map((medications) => DropdownMenuItem(
+                                value: medications,
+                                child: Text(medications.description ?? ''),
+                              ))
+                          .toList(),
+                      onChanged: (medications) {
+                        setState(() {
+                          _selectedProductId = medications;
+                          _unitModel = null;
+                          _units?.clear();
+                          if (medications != null) {
+                            _fetchProductUnits();
+                          }
+                        });
                       },
+                      decoration: const InputDecoration(
+                        labelText: 'İlaç',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<ProductUnitModel>(
+                      value: _unitModel,
+                      hint: const Text('Birim Seçiniz'),
+                      items: _units
+                          ?.map((_units) => DropdownMenuItem(
+                                value: _units,
+                                child: Text(_units.description ?? ''),
+                              ))
+                          .toList(),
+                      onChanged: (_units) {
+                        setState(() {
+                          _unitModel = _units;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        labelText: 'Birim',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _customQuantityController,
+                      decoration: const InputDecoration(
+                        labelText: 'Miktar',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        _quantity = double.parse(value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _addMedication,
+                          child: const Text('Ekle'),
+                        ),
+                        ElevatedButton(
+                          onPressed: _deleteMedication,
+                          child: const Text('Sil'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    TextField(
+                      controller: _noteController,
+                      decoration: const InputDecoration(labelText: 'Not'),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _addNote,
+                          child: const Text('Ekle'),
+                        ),
+                        ElevatedButton(
+                          onPressed: _deleteNote,
+                          child: const Text('Sil'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _endTreatment,
+                            child: const Text('Tedaviyi Sonlandır'),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.orange,
+                              minimumSize: const Size(double.infinity,
+                                  40), // Genişlik ve yükseklik ayarları
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -247,189 +241,18 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ),
     );
   }
-
-  List<DropdownMenuItem<ProductUnitModel>> _buildUnitDropdownItems() {
-    if (_unitModel == null) {
-      return [];
-    } else {
-      return units.map((unit) {
-        return DropdownMenuItem<ProductUnitModel>(
-          value: unit,
-          child: Text(unit.unitId.toString()),
-        );
-      }).toList();
-    }
-  }
-
-  void _addMedication() async {
-    try {
-        treatmentProduct?.productId = _selectedProductId!;
-      treatmentProduct?.unitId = _unitId;
-      treatmentProduct?.insertUser = cachemanager.getItem(0)!.id!;
-      treatmentProduct?.quantity = _quantity;
-      Response response = await dio.post(
-        'TreatmentProduct/AddTreatmentProduct',
-          data: treatmentProduct!.toJson(),
-
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('İlaç başarıyla eklendi'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // İlaç eklendikten sonra ilaç listesini yenilemek için gerekli kodu buraya ekle
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İlaç eklenirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  void _deleteMedication() async {
-    try {
-      if (treatmentProduct != null) {
-        int? productId = treatmentProduct!.id;
-
-        if (productId != null) {
-          Response response = await dio.delete(
-            'TreatmentProduct/DeleteTreatmentProduct',
-          );
-
-          if (response.statusCode == HttpStatus.ok) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('İlaç başarıyla silindi'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          } else {
-            throw Exception('HTTP Hatası ${response.statusCode}');
-          }
-        } else {
-          throw Exception('İlaç id boş olamaz');
-        }
-      } else {
-        throw Exception('TreatmentProduct boş olamaz');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İlaç silinirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Future<void> _fetchProductUnits() async {
-    try {
-      Response response = await dio.get(
-        'ProductUnit/GetAllProductUnits',
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        List<dynamic> responseData = response.data;
-        units = responseData
-            .map((json) => ProductUnitModel.fromJson(json))
-            .toList();
-        setState(() {});
-      } else {
-        throw Exception('HTTP Error ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      throw Exception('An error occurred while fetching product units');
-    }
-  }
-
-  Future<List<ProductModel>> _fetchMedications() async {
-    try {
-      Response response = await dio.get(
-        'Product/GetAllProducts',
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        List<dynamic> responseData = response.data;
-        List<ProductModel> medications = responseData
-            .map((json) => ProductModel.fromJson(json))
-            .toList();
-        return medications;
-      } else {
-        throw Exception('HTTP Error ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      throw Exception('An error occurred while fetching medications');
-    }
-  }
-
-
-  void _addNote() async {
-    try {
-
-      Response response = await dio.post(
-        'TreatmentNote/AddTreatmentNote',
-        data: TreatmentNoteModel(treatmentId: widget.treatment.id!, date: DateTime.now(),
-            notes: _noteController.text, insertUser: cachemanager.getItem(0)!.id!));
-
-      if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Not başarıyla eklendi'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // Not eklendikten sonra not listesini yenilemek için gerekli kodu buraya ekle
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Not eklenirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  void _deleteNote() async {
-    try {
-      Response response = await dio.delete(
-        'TreatmentNote/DeleteTreatmentNote',
-        queryParameters: {'id': _noteId},
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Not başarıyla silindi'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Not silinirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+  String getStatusText(AnimalStatus status) {
+    switch (status) {
+      case AnimalStatus.Normal:
+        return 'Normal';
+      case AnimalStatus.Ill:
+        return 'Hasta';
+      case AnimalStatus.Sold:
+        return 'Satıldı';
+      case AnimalStatus.Ex:
+        return 'Ölü';
+      default:
+        return 'Bilinmiyor';
     }
   }
 
@@ -443,7 +266,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
             labelText: 'Durumu',
           ),
           controller: TextEditingController(
-              text: selectedAnimal.animalStatus.toString() ?? ''),
+              text: getStatusText(selectedAnimal.animalStatus!) ?? ''),
           enabled: false,
         ),
         TextField(
@@ -461,8 +284,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
           decoration: const InputDecoration(
             labelText: 'Küpe No',
           ),
-          controller: TextEditingController(
-              text: selectedAnimal.earringNumber ?? ''),
+          controller:
+          TextEditingController(text: selectedAnimal.earringNumber ?? ''),
           enabled: false,
         ),
         TextField(
@@ -471,7 +294,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
             labelText: 'Padok',
           ),
           controller: TextEditingController(
-              text:selectedAnimal.paddockDescription ?? ''),
+              text: selectedAnimal.paddockDescription ?? ''),
           enabled: false,
         ),
       ],
@@ -498,7 +321,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                   });
                   Navigator.pop(context); // BottomSheet'i kapat
                 },
-
               );
             },
           ),
@@ -550,9 +372,10 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(diagnoses
-                          .firstWhere((element) =>
-                      element.id == _selectedDiagnosis)
-                          .name ?? 'Tanı Seçilmedi'),
+                          .firstWhere(
+                              (element) => element.id == _selectedDiagnosis)
+                          .name ??
+                          'Tanı Seçilmedi'),
                       const Icon(Icons.arrow_drop_down),
                     ],
                   ),
@@ -576,7 +399,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                 onPressed: _saveTreatment,
                 child: const Text('Kaydet'),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40), // Genişlik ve yükseklik ayarları
+                  minimumSize: const Size(
+                      double.infinity, 40), // Genişlik ve yükseklik ayarları
                 ),
               ),
             ),
@@ -584,6 +408,189 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
         ),
       ],
     );
+  }
+
+  void _addMedication() async {
+    try {
+      if (_selectedProductId != null) {
+        treatmentProduct?.productId = _selectedProductId!.id;
+      }
+      if (treatmentProduct != null) {
+        treatmentProduct?.treatmentId = _treatmentId;
+        treatmentProduct?.insertUser = cachemanager.getItem(0)!.id!;
+        treatmentProduct?.unitId = _unitId;
+        treatmentProduct?.quantity = _quantity;
+        treatmentProduct?.animalId = _animalId;
+        if (_quantity <= 0 || _unitModel == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lütfen miktar ve birim seçiniz'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return; // Miktar veya birim girilmedi, işlemi sonlandır
+        }
+      }
+      Response response = await dio.post(
+        'TreatmentProduct/AddTreatmentProduct',
+        data: treatmentProduct!.toJson(),
+      );
+      if (response.statusCode == HttpStatus.ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('İlaç başarıyla eklendi'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // İlaç eklendikten sonra ilaç listesini yenilemek için gerekli kodu buraya ekle
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('İlaç eklenirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _deleteMedication() async {
+    try {
+      if (treatmentProduct != null) {
+        int? productId = treatmentProduct!.id;
+        if (productId != null) {
+          Response response = await dio.delete(
+            'TreatmentProduct/DeleteTreatmentProduct',
+          );
+          if (response.statusCode == HttpStatus.ok) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('İlaç başarıyla silindi'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            throw Exception('HTTP Hatası ${response.statusCode}');
+          }
+        } else {
+          throw Exception('İlaç id boş olamaz');
+        }
+      } else {
+        throw Exception('TreatmentProduct boş olamaz');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('İlaç silinirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _fetchProductUnits() async {
+    try {
+      Response response = await dio.get(
+        'ProductUnit/GetAllProductUnits',
+      );
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data;
+        setState(() {
+          _units = responseData
+              .map((json) => ProductUnitModel.fromJson(json))
+              .toList();
+        });
+      } else {
+        throw Exception('HTTP Error ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('An error occurred while fetching product units');
+    }
+  }
+
+  Future<void> _fetchMedications() async {
+    try {
+      Response response = await dio.get(
+        'Product/GetAllProducts',
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        List<dynamic> responseData = response.data;
+        setState(() {
+          medications =
+              responseData.map((json) => ProductModel.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('HTTP Error ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('An error occurred while fetching medications');
+    }
+  }
+
+  void _addNote() async {
+    try {
+      Response response = await dio.post('TreatmentNote/AddTreatmentNote',
+          data: TreatmentNoteModel(
+              treatmentId: widget.treatment.id!,
+              date: DateTime.now(),
+              notes: _noteController.text,
+              insertUser: cachemanager.getItem(0)!.id!).toJson());
+
+      if (response.statusCode == HttpStatus.ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Not başarıyla eklendi'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Not eklendikten sonra not listesini yenilemek için gerekli kodu buraya ekle
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Not eklenirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _deleteNote() async {
+    try {
+      Response response = await dio.delete(
+        'TreatmentNote/DeleteTreatmentNote',
+        queryParameters: {'id': _noteId},
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Not başarıyla silindi'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Not silinirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
 
@@ -604,7 +611,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   Future<List<DiseaseDiagnoseModel>> _fetchDiagnoses() async {
     try {
       Response response =
-      await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
+          await dio.get('DiseaseDiagnose/GetAllDiseaseDiagnoses');
 
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
@@ -624,12 +631,12 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   Future<void> _fetchAnimal() async {
     try {
-      Response response =
-      await dio.get('Animal/GetAnimalByRfIdOrEarringNumber',
-          queryParameters: {
-            "identityNumber": widget.treatment.animalEarringNumber,
-          });
-
+      Response response = await dio.get(
+        'Animal/GetAnimalByRfIdOrEarringNumber',
+        queryParameters: {
+          "identityNumber": widget.treatment.animalEarringNumber,
+        },
+      );
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
         if (responseData.isNotEmpty) {
@@ -682,7 +689,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
 
   void _endTreatment() async {
     try {
-        widget.treatment.id = _treatmentId;
+      widget.treatment.id = _treatmentId;
 
       Response response = await dio.post(
         'Treatment/EndTreatment',

@@ -4,30 +4,30 @@ part 'product_unit_model.g.dart';
 
 @JsonSerializable()
 class ProductUnitModel {
-  int id;
+  int? id;
   int producId;
   int unitId;
-  String code;
-  String description;
+  String? code;
+  String? description;
   double quantity;
-  bool isMain;
+  bool? isMain;
   String insertUser;
   DateTime? insertDate;
-  String updateUser;
+  String? updateUser;
   DateTime? updateDate;
 
   ProductUnitModel({
-    required this.id,
+    this.id,
     required this.producId,
     required this.unitId,
-    required this.code,
-    required this.description,
+    this.code,
+    this.description,
     required this.quantity,
-    required this.isMain,
+    this.isMain,
     required this.insertUser,
-    required this.insertDate,
-    required this.updateUser,
-    required this.updateDate,
+    this.insertDate,
+    this.updateUser,
+    this.updateDate,
   });
 
   factory ProductUnitModel.fromJson(Map<String, dynamic> json) =>
