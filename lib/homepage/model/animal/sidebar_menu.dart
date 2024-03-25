@@ -1,8 +1,10 @@
 import 'package:farmsoftnew/homepage/model/animalReport/all_reports.dart';
 import 'package:farmsoftnew/homepage/model/weight/weight.dart';
 import 'package:flutter/material.dart';
+import '../baitList/bait_List.dart';
 import '../transfer/transfer_operations.dart';
 import '../treatment/treatment.dart';
+import '../vaccination/vaccination_screen.dart';
 import 'animal_search.dart';
 import 'animal_test.dart';
 
@@ -166,7 +168,7 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => NotificationListPage()),
+                MaterialPageRoute(builder: (context) => AllVaccinationPage()),
               );
             },
           ),
@@ -192,6 +194,27 @@ class SideBarMenu extends StatelessWidget {
             },
           ),
           SizedBox(height: 10), // Boşluk ekledik
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/bait.png'),
+              radius: 18,
+            ),
+            title: const Text(
+              'Yem Karma',
+              style: TextStyle(
+                color: Colors.blue, // Metin rengini mavi yapar
+                fontSize: 15,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BaitListPage()),
+              );
+            },
+          ),
+          SizedBox(height: 10),
         ],
       ),
     );

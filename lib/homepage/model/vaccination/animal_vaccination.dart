@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:flutter/material.dart';
@@ -98,6 +97,7 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
       }).toList(),
     );
   }
+
   Future<void> _fetchVaccinations(int animalId) async {
     try {
       Response response = await dio.get(
@@ -168,5 +168,4 @@ class _AnimalVaccinationPageState extends State<AnimalVaccinationPage> {
       );
     }
   }
-
 }

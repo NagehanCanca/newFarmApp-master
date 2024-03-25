@@ -18,12 +18,16 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
   List<TreatmentProductModel> medications = [];
   List<TreatmentNoteModel> notes = [];
   bool _isLoading = false;
+  TreatmentNoteModel? treatmentNote;
+  TreatmentProductModel? treatmentProduct = TreatmentProductModel();
+  int? _noteId;
 
   @override
   void initState() {
     super.initState();
     _fetchMedications();
     _fetchNotes();
+    _noteId = treatmentNote?.id ?? 0;
   }
 
   @override
@@ -39,6 +43,7 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 10),
             Text(
               'İlaçlar',
               style: TextStyle(
@@ -48,6 +53,7 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
             ),
             DataTable(
               columns: const [
+                DataColumn(label: Text('İşlem')),
                 DataColumn(
                   label: Text(
                     'İlaç Adı',
@@ -77,6 +83,14 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
                 return DataRow(
                   cells: [
                     DataCell(
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _deleteMedication();
+                        },
+                      ),
+                    ),
+                    DataCell(
                       GestureDetector(
                         onTap: () {
                           // Navigate to medication details page
@@ -85,8 +99,10 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
                       ),
                     ),
                     DataCell(Text('${medication.quantity}')),
-                    DataCell(Text(medication.updateUserDescription ?? '-')),
-                    DataCell(Text(medication.updateDate?.toString() ?? '-')),
+                    DataCell(
+                        Text(medication.updateUserDescription ?? '-')),
+                    DataCell(
+                        Text(medication.updateDate?.toString() ?? '-')),
                   ],
                 );
               }).toList(),
@@ -101,6 +117,7 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
             ),
             DataTable(
               columns: const [
+                DataColumn(label: Text('İşlem')),
                 DataColumn(
                   label: Text(
                     'Not İçeriği',
@@ -123,6 +140,22 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
               rows: notes.map((note) {
                 return DataRow(
                   cells: [
+                    DataCell(
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _deleteNote();
+                        },
+                      ),
+                    ),
+                    DataCell(
+                      GestureDetector(
+                        onTap: () {
+                          // Navigate to medication details page
+                        },
+                        child: Text(note.id.toString()),
+                      ),
+                    ),
                     DataCell(Text(note.notes)),
                     DataCell(Text(note.updateUserDescription ?? '-')),
                     DataCell(Text(note.updateDate?.toString() ?? '-')),
@@ -135,6 +168,7 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
       ),
     );
   }
+
 
   Future<void> _fetchMedications() async {
     setState(() {
@@ -170,7 +204,8 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
       );
     } finally {
       setState(() {
-        _isLoading = false; // Veri alımı tamamlandığında yükleniyor göstergesini gizle
+        _isLoading =
+            false; // Veri alımı tamamlandığında yükleniyor göstergesini gizle
       });
     }
   }
@@ -211,6 +246,69 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void _deleteMedication() async {
+    try {
+      if (treatmentProduct != null) {
+        int? productId = treatmentProduct!.id;
+        if (productId != null) {
+          Response response = await dio.delete(
+            'TreatmentProduct/DeleteTreatmentProduct',
+          );
+          if (response.statusCode == HttpStatus.ok) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('İlaç başarıyla silindi'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            throw Exception('HTTP Hatası ${response.statusCode}');
+          }
+        } else {
+          throw Exception('İlaç id boş olamaz');
+        }
+      } else {
+        throw Exception('TreatmentProduct boş olamaz');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('İlaç silinirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _deleteNote() async {
+    try {
+      Response response = await dio.delete(
+        'TreatmentNote/DeleteTreatmentNote',
+        queryParameters: {'id': _noteId},
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Not başarıyla silindi'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        throw Exception('HTTP Hatası ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Hata: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Not silinirken bir hata oluştu'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 }

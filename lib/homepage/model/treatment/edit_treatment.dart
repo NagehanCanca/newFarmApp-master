@@ -35,8 +35,8 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   int? _noteId;
   late double _quantity;
   late int _unitId;
-  late int _animalId;
-  late TextEditingController _customQuantityController = TextEditingController();
+  int? _animalId;
+  TextEditingController _customQuantityController = TextEditingController();
   ProductModel? _selectedProductId;
   ProductUnitModel? _unitModel;
   List<ProductModel> medications = [];
@@ -126,9 +126,9 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                       hint: const Text('İlaç Seçiniz'),
                       items: medications
                           ?.map((medications) => DropdownMenuItem(
-                                value: medications,
-                                child: Text(medications.description ?? ''),
-                              ))
+                        value: medications,
+                        child: Text(medications.description ?? ''),
+                      ))
                           .toList(),
                       onChanged: (medications) {
                         setState(() {
@@ -151,9 +151,9 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                       hint: const Text('Birim Seçiniz'),
                       items: _units
                           ?.map((_units) => DropdownMenuItem(
-                                value: _units,
-                                child: Text(_units.description ?? ''),
-                              ))
+                        value: _units,
+                        child: Text(_units.description ?? ''),
+                      ))
                           .toList(),
                       onChanged: (_units) {
                         setState(() {
@@ -185,13 +185,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                           onPressed: _addMedication,
                           child: const Text('Ekle'),
                         ),
-                        ElevatedButton(
-                          onPressed: _deleteMedication,
-                          child: const Text('Sil'),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.red,
-                          ),
-                        ),
                       ],
                     ),
                     TextField(
@@ -205,13 +198,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
                         ElevatedButton(
                           onPressed: _addNote,
                           child: const Text('Ekle'),
-                        ),
-                        ElevatedButton(
-                          onPressed: _deleteNote,
-                          child: const Text('Sil'),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.red,
-                          ),
                         ),
                       ],
                     ),
@@ -241,6 +227,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ),
     );
   }
+
   String getStatusText(AnimalStatus status) {
     switch (status) {
       case AnimalStatus.Normal:
@@ -424,7 +411,7 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
         if (_quantity <= 0 || _unitModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Lütfen miktar ve birim seçiniz'),
+              content: Text('Lütfen miktar ve birim giriniz.'),
               duration: Duration(seconds: 2),
             ),
           );
