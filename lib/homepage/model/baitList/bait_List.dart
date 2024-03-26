@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../service/base.service.dart';
 
 class BaitListPage extends StatefulWidget {
-  const BaitListPage({super.key});
+  const BaitListPage({super.key,});
 
   @override
   State<BaitListPage> createState() => _BaitListPageState();
@@ -14,7 +14,6 @@ class BaitListPage extends StatefulWidget {
 
 class _BaitListPageState extends State<BaitListPage> {
   List<BaitListModel> baitList = [];
-  BaitListModel? bait = BaitListModel();
 
   @override
   void initState() {
@@ -37,13 +36,13 @@ class _BaitListPageState extends State<BaitListPage> {
     return ListView.builder(
       itemCount: baitList.length,
       itemBuilder: (context, index) {
-        final animal = baitList[index];
+        final bait = baitList[index];
         return InkWell(
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ScaleDevicePage(),
+                builder: (context) => ScaleDevicePage(baitListid: baitList[index].id!),
               ),
             );
           },
@@ -61,13 +60,13 @@ class _BaitListPageState extends State<BaitListPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Açıklama: ${bait!.description}', style: const TextStyle(fontSize: 16)),
+                        Text('Açıklama: ${bait.description}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Hayvan Sayısı: ${animal.animalCount}', style: const TextStyle(fontSize: 16)),
+                        Text('Hayvan Sayısı: ${bait.animalCount}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Uygulanan Hayvan Sayısı: ${animal.appliedAnimalCount.toString().split('.').last}', style: TextStyle(fontSize: 16)),
+                        Text('Uygulanan Hayvan Sayısı: ${bait.appliedAnimalCount.toString().split('.').last}', style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Tarih: ${_formatDate(animal.date!)}', style: TextStyle(fontSize: 16)),
+                        Text('Tarih: ${_formatDate(bait.date!)}', style: TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),

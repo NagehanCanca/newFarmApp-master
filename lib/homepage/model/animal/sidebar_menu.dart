@@ -210,8 +210,8 @@ class SideBarMenu extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BaitListPage()),
-              );
+                MaterialPageRoute(builder: (context) => BaitListPage(),
+              ));
             },
           ),
           SizedBox(height: 10),

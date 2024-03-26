@@ -8,7 +8,7 @@ class ScaleDeviceModel {
   String? name;
   ScaleType? scaleType;
   ScaleStatus? scaleStatus;
-  int? blendId;
+  int? baitDistrubitonId;
   bool? canBlend;
   bool? canDistribution;
   ScaleConnectionType? scaleConnectionType;
@@ -31,7 +31,7 @@ class ScaleDeviceModel {
     this.name,
     this.scaleType,
     this.scaleStatus,
-    this.blendId,
+    this.baitDistrubitonId,
     this.canBlend,
     this.canDistribution,
     this.scaleConnectionType,

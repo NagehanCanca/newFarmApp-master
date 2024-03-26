@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/homepage/model/blend/blend.dart';
 import 'package:flutter/material.dart';
+import '../../../model/bait_distrubition_model.dart';
+import '../../../model/base_cache_manager.dart';
 import '../../../model/scale_device_model.dart';
 import '../../../service/base.service.dart';
 
 class ScaleDevicePage extends StatefulWidget {
-  const ScaleDevicePage({super.key});
+  final int baitListid;
+  const ScaleDevicePage({super.key, required this.baitListid});
 
   @override
   State<ScaleDevicePage> createState() => _ScaleDevicePageState();
@@ -13,7 +17,6 @@ class ScaleDevicePage extends StatefulWidget {
 
 class _ScaleDevicePageState extends State<ScaleDevicePage> {
   List<ScaleDeviceModel> deviceList = [];
-  ScaleDeviceModel? device = ScaleDeviceModel();
 
   @override
   void initState() {
@@ -38,11 +41,10 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
         final device = deviceList[index];
         return InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ScaleDevicePage(),
-              ),
+            deviceList[index].scaleStatus == ScaleStatus.Ready ?
+            _addBaitDistribution(deviceList[index].id!) :
+            MaterialPageRoute(
+                builder: (context) => BlendPage(BaitDistributionId : deviceList[0].baitDistrubitonId!)
             );
           },
           child: Card(
@@ -84,6 +86,8 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
     try {
       Response response = await dio.get(
         "ScaleDevice/GetScaleDeviceByScaleType",
+        queryParameters: {'scaleType': ScaleType.FeedMixingScale.index
+        }
       );
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
@@ -98,6 +102,37 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error fetching animal list'),
+        ),
+      );
+    }
+  }
+
+    void _addBaitDistribution(int _deviceId) async {
+    try {
+      Response response = await dio.post(
+        "BaitDistribution/AddBaitDistributionByBaitList",
+        queryParameters: {
+          'baitListId': widget.baitListid,
+          'scaleDeviceId': _deviceId
+        },
+        data: cachemanager.getItem(0)?.toJson(),
+      );
+      if (response.statusCode == HttpStatus.ok) {
+        dynamic responseData = response.data;
+
+        BaitDistributionModel result = responseData.map((json) => BaitDistributionModel.fromJson(json));
+
+        MaterialPageRoute(
+          builder: (context) => BlendPage(BaitDistributionId : result.id!)
+        );
+      } else {
+        throw Exception('HTTP Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error blending baits'),
         ),
       );
     }

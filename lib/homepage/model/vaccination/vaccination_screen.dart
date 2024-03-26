@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/all_vaccination_model.dart';
 import 'package:flutter/material.dart';
@@ -68,11 +67,11 @@ class _AllVaccinationPageState extends State<AllVaccinationPage> {
                         const SizedBox(height: 8),
                         Text('Birim Kodu: ${vaccination?.unitCode.toString().split('.').last}', style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Gün: ${_formatDate(vaccination?.day as DateTime)}', style: TextStyle(fontSize: 16)),
+                        Text('Gün: ${_formatDate(vaccination?.day as DateTime?)}', style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
                         Text('Kaydeden kullanıcı: ${vaccination?.updateUser}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Kayıt Tarihi: ${_formatDate(vaccination?.updateDate as DateTime)}', style: TextStyle(fontSize: 16)),
+                        Text('Kayıt Tarihi: ${_formatDate(vaccination?.updateDate)}', style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -86,8 +85,12 @@ class _AllVaccinationPageState extends State<AllVaccinationPage> {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
+  String _formatDate(DateTime? date) {
+    if (date != null) {
+      return "${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}";
+    } else {
+      return "";
+    }
   }
 
   Future<void> _fetchVacinations() async {
