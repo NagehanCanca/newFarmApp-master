@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:farmsoftnew/model/bait_distrubition_model.dart';
 import 'package:farmsoftnew/model/bait_distrubition_product_model.dart';
-import 'package:farmsoftnew/model/base_cache_manager.dart';
 import 'package:flutter/material.dart';
 
 import '../../../service/base.service.dart';
@@ -54,13 +52,15 @@ class _BlendPageState extends State<BlendPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(width: 16),
-                  const Icon(Icons.devices, size: 48),
+                  const Icon(Icons.track_changes_outlined, size: 40),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Device Name: ${blend.baitDistributionId}', style: const TextStyle(fontSize: 16)),
+                        Text('Harman: ${blend.baitDistributionId}', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text('Ürün: ${blend.productName}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -76,8 +76,8 @@ class _BlendPageState extends State<BlendPage> {
 
   Future<void> _baitDistributionProducts() async {
     try {
-        Response response = await dio.post(
-          "BaitDistributionProduct/GetAllBaitDistributionProducts",
+        Response response = await dio.get(
+          "BaitDistributionProduct/GetAllBaitDistributionProductsByBaitDistributionId",
           queryParameters: {
             'baitDistributionId': widget.BaitDistributionId,
           },

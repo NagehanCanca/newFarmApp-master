@@ -9,6 +9,7 @@ import '../../../service/base.service.dart';
 
 class ScaleDevicePage extends StatefulWidget {
   final int baitListid;
+
   const ScaleDevicePage({super.key, required this.baitListid});
 
   @override
@@ -23,6 +24,7 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
     super.initState();
     _fetchDevices();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,11 +43,15 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
         final device = deviceList[index];
         return InkWell(
           onTap: () {
-            deviceList[index].scaleStatus == ScaleStatus.Ready ?
-            _addBaitDistribution(deviceList[index].id!) :
-            MaterialPageRoute(
-                builder: (context) => BlendPage(BaitDistributionId : deviceList[0].baitDistrubitonId!)
-            );
+            deviceList[index].scaleStatus == ScaleStatus.Ready
+                ? _addBaitDistribution(deviceList[index].id!)
+                : Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => BlendPage(
+                            BaitDistributionId:
+                                deviceList[0].baitDistrubitonId!)),
+                  );
           },
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -66,9 +72,11 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Device Name: ${device.name}', style: const TextStyle(fontSize: 16)),
+                        Text('Device Name: ${device.name}',
+                            style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('ID: ${device.id}', style: const TextStyle(fontSize: 16)),
+                        Text('ID: ${device.id}',
+                            style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -84,15 +92,14 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
 
   Future<void> _fetchDevices() async {
     try {
-      Response response = await dio.get(
-        "ScaleDevice/GetScaleDeviceByScaleType",
-        queryParameters: {'scaleType': ScaleType.FeedMixingScale.index
-        }
-      );
+      Response response = await dio.get("ScaleDevice/GetScaleDeviceByScaleType",
+          queryParameters: {'scaleType': ScaleType.FeedMixingScale.index});
       if (response.statusCode == HttpStatus.ok) {
         List<dynamic> responseData = response.data;
         setState(() {
-          deviceList = responseData.map((json) => ScaleDeviceModel.fromJson(json)).toList();
+          deviceList = responseData
+              .map((json) => ScaleDeviceModel.fromJson(json))
+              .toList();
         });
       } else {
         throw Exception('HTTP Error: ${response.statusCode}');
@@ -107,7 +114,7 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
     }
   }
 
-    void _addBaitDistribution(int _deviceId) async {
+  void _addBaitDistribution(int _deviceId) async {
     try {
       Response response = await dio.post(
         "BaitDistribution/AddBaitDistributionByBaitList",
@@ -119,11 +126,13 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
       );
       if (response.statusCode == HttpStatus.ok) {
         dynamic responseData = response.data;
-
-        BaitDistributionModel result = responseData.map((json) => BaitDistributionModel.fromJson(json));
-
-        MaterialPageRoute(
-          builder: (context) => BlendPage(BaitDistributionId : result.id!)
+        BaitDistributionModel result =
+            BaitDistributionModel.fromJson(responseData);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlendPage(BaitDistributionId: result.id!),
+          ),
         );
       } else {
         throw Exception('HTTP Error: ${response.statusCode}');

@@ -14,9 +14,9 @@ BaitDistributionProductModel _$BaitDistributionProductModelFromJson(Map<String, 
     orderBy: json['orderBy'] as int,
     productID: json['productID'] as int,
     productName: json['productName'] as String,
-    quantity: (json['quantity'] as num).toDouble(),
-    totalQuantity: (json['totalQuantity'] as num).toDouble(),
-    appliedTotalQuantity: (json['appliedTotalQuantity'] as num).toDouble(),
+    quantity: (json['quantity'] ?? 0.0) as double,
+    totalQuantity: (json['totalQuantity'] ?? 0.0)as double,
+    appliedTotalQuantity: (json['appliedTotalQuantity'] ?? 0.0)as double,
     loadUserID: json['loadUserID'] as int?,
     loadDate: json['loadDate'] == null
         ? null
