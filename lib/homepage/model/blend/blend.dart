@@ -3,11 +3,12 @@ import 'package:dio/dio.dart';
 import 'package:farmsoftnew/model/bait_distrubition_product_model.dart';
 import 'package:flutter/material.dart';
 
+import '../../../model/bait_distrubition_model.dart';
 import '../../../service/base.service.dart';
 
 class BlendPage extends StatefulWidget {
-  final int BaitDistributionId;
-  const BlendPage({Key? key, required this.BaitDistributionId}) : super(key: key);
+  final BaitDistributionModel BaitDistribution;
+  const BlendPage({Key? key, required this.BaitDistribution}) : super(key: key);
 
   @override
   _BlendPageState createState() => _BlendPageState();
@@ -37,7 +38,7 @@ class _BlendPageState extends State<BlendPage> {
     return ListView.builder(
       itemCount: productList.length,
       itemBuilder: (context, index) {
-        final blend = productList[index];
+        final product = productList[index];
         return InkWell(
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -58,9 +59,9 @@ class _BlendPageState extends State<BlendPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Harman: ${blend.baitDistributionId}', style: const TextStyle(fontSize: 16)),
+                        Text('Harman: ${product.productName}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Ürün: ${blend.productName}', style: const TextStyle(fontSize: 16)),
+                        Text('Ürün: ${product.appliedTotalQuantity}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -79,7 +80,7 @@ class _BlendPageState extends State<BlendPage> {
         Response response = await dio.get(
           "BaitDistributionProduct/GetAllBaitDistributionProductsByBaitDistributionId",
           queryParameters: {
-            'baitDistributionId': widget.BaitDistributionId,
+            'baitDistributionId': widget.BaitDistribution.id,
           },
         );
         if (response.statusCode == HttpStatus.ok) {

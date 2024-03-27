@@ -3,14 +3,15 @@ import 'package:dio/dio.dart';
 import 'package:farmsoftnew/homepage/model/blend/blend.dart';
 import 'package:flutter/material.dart';
 import '../../../model/bait_distrubition_model.dart';
+import '../../../model/bait_list_model.dart';
 import '../../../model/base_cache_manager.dart';
 import '../../../model/scale_device_model.dart';
 import '../../../service/base.service.dart';
 
 class ScaleDevicePage extends StatefulWidget {
-  final int baitListid;
+  final BaitListModel baitList;
 
-  const ScaleDevicePage({super.key, required this.baitListid});
+  const ScaleDevicePage({super.key, required this.baitList});
 
   @override
   State<ScaleDevicePage> createState() => _ScaleDevicePageState();
@@ -45,13 +46,7 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
           onTap: () {
             deviceList[index].scaleStatus == ScaleStatus.Ready
                 ? _addBaitDistribution(deviceList[index].id!)
-                : Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BlendPage(
-                            BaitDistributionId:
-                                deviceList[0].baitDistrubitonId!)),
-                  );
+                : _getBaitDistribution(deviceList[index].baitDistrubitonId!);
           },
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -119,7 +114,7 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
       Response response = await dio.post(
         "BaitDistribution/AddBaitDistributionByBaitList",
         queryParameters: {
-          'baitListId': widget.baitListid,
+          'baitListId': widget.baitList.id,
           'scaleDeviceId': _deviceId
         },
         data: cachemanager.getItem(0)?.toJson(),
@@ -131,7 +126,38 @@ class _ScaleDevicePageState extends State<ScaleDevicePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BlendPage(BaitDistributionId: result.id!),
+            builder: (context) => BlendPage(BaitDistribution: result!),
+          ),
+        );
+      } else {
+        throw Exception('HTTP Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error blending baits'),
+        ),
+      );
+    }
+  }
+
+  void _getBaitDistribution(int baitDistributionId) async {
+    try {
+      Response response = await dio.post(
+        "BaitDistribution/GetBaitDistributionById",
+        queryParameters: {
+          'id': baitDistributionId,
+        }
+      );
+      if (response.statusCode == HttpStatus.ok) {
+        dynamic responseData = response.data;
+        BaitDistributionModel result =
+        BaitDistributionModel.fromJson(responseData);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlendPage(BaitDistribution: result!),
           ),
         );
       } else {

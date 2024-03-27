@@ -42,7 +42,7 @@ class _BaitListPageState extends State<BaitListPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ScaleDevicePage(baitListid: baitList[index].id!),
+                builder: (context) => ScaleDevicePage(baitList: baitList[index]),
               ),
             );
           },
