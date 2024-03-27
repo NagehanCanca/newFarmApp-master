@@ -3,9 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
+import '../../../model/bait_distrubition_product_model.dart';
 import '../../../service/base.service.dart';
 
 class ScaleDenemePage extends StatefulWidget {
+  final BaitDistributionProductModel product;
+
+  const ScaleDenemePage({Key? key, required this.product}) : super(key: key);
+
   @override
   _ScaleDenemePageState createState() => _ScaleDenemePageState();
 }
@@ -18,7 +23,8 @@ class _ScaleDenemePageState extends State<ScaleDenemePage> {
   void initState() {
     super.initState();
     weightData = '';
-    timer = Timer.periodic(const Duration(milliseconds: 500), (Timer t) => _fetchScaleData(1));
+    timer = Timer.periodic(
+        const Duration(milliseconds: 500), (Timer t) => _fetchScaleData(1));
   }
 
   @override
@@ -47,28 +53,63 @@ class _ScaleDenemePageState extends State<ScaleDenemePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scale Test Page'),
+        title: Text('Ürün Detayları: ${widget.product.productName}'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Weight Data:',
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            margin: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(15.0),
             ),
-            SizedBox(height: 10),
-            Container(
-              padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Toplam Miktar: ${widget.product.totalQuantity}',
+                    style: TextStyle(fontSize: 16)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(),
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(15.0),
               ),
-              child: Text(
-                weightData,
-                style: TextStyle(fontSize: 18),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Tartı Verileri:',
+                      style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      weightData,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              // Verileri kaydetme işlemi (örnek olarak bir mesaj yazdım)
+              print('Veriler kaydedildi: $weightData');
+              Navigator.pop(context);
+            },
+            child: Text('Onayla'),
+          ),
+          SizedBox(height: 16),
+        ],
       ),
     );
   }

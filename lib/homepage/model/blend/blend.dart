@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/homepage/model/blend/scale_deneme.dart';
 import 'package:farmsoftnew/model/bait_distrubition_product_model.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class _BlendPageState extends State<BlendPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Harmanlama'),
+        title: const Text('Harmanlama Sayfası'),
         actions: [],
       ),
       body: _buildBlendList(),
@@ -40,6 +41,14 @@ class _BlendPageState extends State<BlendPage> {
       itemBuilder: (context, index) {
         final product = productList[index];
         return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ScaleDenemePage(product: product),
+              ),
+            );
+          },
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             shape: RoundedRectangleBorder(
@@ -74,6 +83,7 @@ class _BlendPageState extends State<BlendPage> {
       },
     );
   }
+
 
   Future<void> _baitDistributionProducts() async {
     try {
