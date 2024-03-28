@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:farmsoftnew/model/treatment_model.dart';
 import 'package:flutter/material.dart';
 
 import '../../../model/treatment_note_model.dart';
@@ -19,8 +20,10 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
   List<TreatmentNoteModel> notes = [];
   bool _isLoading = false;
   TreatmentNoteModel? treatmentNote;
+  TreatmentModel? treatment;
   TreatmentProductModel? treatmentProduct = TreatmentProductModel();
   int? _noteId;
+  int? _treatmentId;
 
   @override
   void initState() {
@@ -28,6 +31,7 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
     _fetchMedications();
     _fetchNotes();
     _noteId = treatmentNote?.id ?? 0;
+    _treatmentId = treatment?.id;
   }
 
   @override
@@ -176,7 +180,10 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
     });
     try {
       Response response = await dio.get(
-        "TreatmentProduct/GetAllTreatmentProducts",
+        "TreatmentProduct/GetAllTreatmentProductsByTreatmentId",
+        queryParameters: {
+          'treatmentId' : _treatmentId
+        }
       );
 
       if (response.statusCode == HttpStatus.ok) {
@@ -205,7 +212,7 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
     } finally {
       setState(() {
         _isLoading =
-            false; // Veri alımı tamamlandığında yükleniyor göstergesini gizle
+            false;
       });
     }
   }
@@ -216,9 +223,11 @@ class _NotesAndMedicationsState extends State<NotesAndMedicationsPage> {
     });
     try {
       Response response = await dio.get(
-        "TreatmentNote/GetAllTreatmentNotes",
+        "TreatmentNote/GetAllTreatmentNotesByTreatmentId",
+        queryParameters: {
+          'treatmentId' : _treatmentId
+        }
       );
-
       if (response.statusCode == HttpStatus.ok) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

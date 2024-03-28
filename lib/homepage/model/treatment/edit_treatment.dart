@@ -32,7 +32,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
   late List<DiseaseDiagnoseModel> _diagnoses;
   late TextEditingController _noteController;
   late int _treatmentId;
-  int? _noteId;
   late double _quantity;
   late int _unitId;
   int? _animalId;
@@ -51,13 +50,12 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     _selectedDate = widget.treatment.date;
     _descriptionController =
         TextEditingController(text: widget.treatment.notes);
-    _selectedDiagnosis = widget.treatment.diseaseDiagnoseId ?? 0;
+    _selectedDiagnosis = widget.treatment.diseaseDiagnoseId;
     _noteController = TextEditingController();
     _treatmentId = widget.treatment.id ?? 0;
-    _animalId = widget.treatment.animalID ?? 0;
+    _animalId = widget.treatment.animalID;
     _quantity = treatmentProduct?.quantity ?? 0;
     _unitId = treatmentProduct?.unitId ?? 0;
-    _noteId = treatmentNote?.id ?? 0;
     _fetchMedications();
   }
 
@@ -444,41 +442,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
     }
   }
 
-  void _deleteMedication() async {
-    try {
-      if (treatmentProduct != null) {
-        int? productId = treatmentProduct!.id;
-        if (productId != null) {
-          Response response = await dio.delete(
-            'TreatmentProduct/DeleteTreatmentProduct',
-          );
-          if (response.statusCode == HttpStatus.ok) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('İlaç başarıyla silindi'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          } else {
-            throw Exception('HTTP Hatası ${response.statusCode}');
-          }
-        } else {
-          throw Exception('İlaç id boş olamaz');
-        }
-      } else {
-        throw Exception('TreatmentProduct boş olamaz');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İlaç silinirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
   Future<void> _fetchProductUnits() async {
     try {
       Response response = await dio.get(
@@ -546,34 +509,6 @@ class _EditTreatmentPageState extends State<EditTreatmentPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Not eklenirken bir hata oluştu'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  void _deleteNote() async {
-    try {
-      Response response = await dio.delete(
-        'TreatmentNote/DeleteTreatmentNote',
-        queryParameters: {'id': _noteId},
-      );
-
-      if (response.statusCode == HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Not başarıyla silindi'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        throw Exception('HTTP Hatası ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Hata: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Not silinirken bir hata oluştu'),
           duration: Duration(seconds: 2),
         ),
       );

@@ -69,7 +69,7 @@ class _ScaleDenemePageState extends State<ScaleDenemePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Toplam Miktar: ${widget.product.totalQuantity}',
-                    style: TextStyle(fontSize: 16)),
+                    style: const TextStyle(fontSize: 16)),
               ],
             ),
           ),
@@ -84,8 +84,8 @@ class _ScaleDenemePageState extends State<ScaleDenemePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Tartı Verileri:',
+                    const Text(
+                      'Tartı Ölçümü:',
                       style: TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
